@@ -28,12 +28,12 @@ export default function Briefing({ airport, date, horizon }: { airport: string; 
       <p className="mb-2 text-xs text-neutral-500">
         Restates model outputs and cited, timestamped signals only. It never adds numbers; the TMC decides.
       </p>
-      <button onClick={run} disabled={loading}
-        className="rounded bg-neutral-900 px-3 py-1.5 text-white disabled:opacity-50 dark:bg-white dark:text-black">
+      <button onClick={run} disabled={loading} aria-busy={loading}
+        className="rounded bg-neutral-900 px-3 py-1.5 text-white transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transform-none disabled:opacity-60 dark:bg-white dark:text-black">
         {loading ? "Writing…" : `Brief ${airport} ${date}, ${horizon} h ahead`}
       </button>
       {result?.error && <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{result.error}</p>}
-      {result?.briefing && <div className="mt-2 whitespace-pre-wrap rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900">{result.briefing}</div>}
+      {result?.briefing && <div className="reveal mt-2 whitespace-pre-wrap rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900">{result.briefing}</div>}
       {result && (
         <details className="mt-2 text-xs">
           <summary className="cursor-pointer text-neutral-500">Facts given to Claude (source of every number)</summary>

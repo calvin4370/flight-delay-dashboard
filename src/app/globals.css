@@ -44,3 +44,20 @@ th {
 td {
   padding: 0.25rem 0.5rem 0.25rem 0;
 }
+
+/* One-off reveal for the briefing text: fade and settle in, 200ms strong ease-out (emil-design-eng). */
+.reveal {
+  opacity: 1;
+  transform: translateY(0);
+  transition: opacity 200ms cubic-bezier(0.23, 1, 0.32, 1), transform 200ms cubic-bezier(0.23, 1, 0.32, 1);
+  @starting-style {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    transform: none;
+    transition: opacity 200ms ease;
+  }
+}

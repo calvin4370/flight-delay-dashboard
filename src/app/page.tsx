@@ -51,7 +51,7 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
       <nav className="mb-4 flex flex-wrap gap-2">
         {VIEWS.map(([v, label]) => (
           <Link key={v} href={q({ view: v })}
-            className={`rounded px-3 py-1.5 ${view === v ? "bg-neutral-900 text-white dark:bg-white dark:text-black" : "bg-neutral-100 dark:bg-neutral-800"}`}>
+            className={`rounded px-3 py-1.5 transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transform-none ${view === v ? "bg-neutral-900 text-white dark:bg-white dark:text-black" : "bg-neutral-100 hover:bg-neutral-200 dark:bg-neutral-800 dark:hover:bg-neutral-700"}`}>
             {label}
           </Link>
         ))}
@@ -73,7 +73,7 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
               {HORIZONS.map((h) => <option key={h} value={h}>{h} h</option>)}
             </select>
           </label>
-          <button className="rounded bg-neutral-900 px-3 py-1.5 text-white dark:bg-white dark:text-black">Show</button>
+          <button className="rounded bg-neutral-900 px-3 py-1.5 text-white transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transform-none dark:bg-white dark:text-black">Show</button>
           {failureDays.length > 0 && (
             <span className="text-xs text-neutral-500">
               Known failure days: {failureDays.map((d) => <Link key={d} href={q({ date: d })} className="mr-2 underline">{d}</Link>)}
