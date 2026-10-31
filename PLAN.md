@@ -115,13 +115,12 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 
 ## Workload split (D41, decided)
 
-Goal: each person works in their own files and branch, so changes land one after another without merge clashes.
+Goal: each person works in their own files on `main`, so changes land one after another without merge clashes.
 
 | | **Calvin** | **YXY4NG** |
 |---|---|---|
 | Owns | WS2 delay classifier; delay side of WS1; WS7 evaluation write-up; WS8 pitch and submission | WS3 AAR regressor; any-airport fetch in WS1 (D13, D39); WS4 contract; WS5 app; WS6 Claude briefing |
 | Files | `pipeline/build_delay.py`, `pipeline/train_delay.py`, `data/outputs/delay_*`, `notebooks/`, `pyproject.toml` + `uv.lock` (adds `shap`) | `pipeline/*_aar.py`, `pipeline/fetch_bts.py`, `pipeline/fetch_weather.py` (+ airport data), `data/outputs/aar_*`, `src/` (app) |
-| Branch | `delay` | `AAR`, then `app` |
 | Drafts (D37) | — | D35 JSON fields, D36 recommendation rules |
 
 **Order of work**
@@ -134,7 +133,7 @@ Goal: each person works in their own files and branch, so changes land one after
 - Shared code: the delay pipeline may import `weather_features()` from `pipeline/build_aar.py` but doesn't edit it; YXY4NG announces any change to it.
 - Packages: only one person changes `pyproject.toml` / `uv.lock` at a time (Calvin adds `shap`); everyone runs `uv sync` after pulling.
 - `PLAN.md`: pull first, edit only your own task lines, commit plan changes on their own, and push straight away.
-- Merges into `main` are done by the branch owner after their pipeline runs end to end.
+- Everyone pushes straight to `main`: pull before every commit and push; commit small, push often.
 
 ## Workstreams
 
