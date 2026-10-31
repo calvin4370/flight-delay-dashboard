@@ -102,6 +102,34 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D39 | Which public airport database (D13), and any package needed for the weather/airport fetch |
 | D43 | Flights in the repeated autumn daylight-saving hour (not covered by the brief; affects only the AAR pipeline, 0 delay-model flights): YXY4NG decides and states it as an assumption |
 
+### D35 proposal: output JSON contract (drafted by Claude per D37; *Open* until a team member approves)
+
+All files in `data/outputs/`, UTF-8 JSON, times as ISO strings (`time_utc` plus `time_local`). Every file starts with
+`"generated_utc"`, `"source"` (script name) and `"split"` (D11 dates). Missing values are `null`, never invented.
+
+| File | Owner | Top-level fields |
+|---|---|---|
+| `aar_forecast.json` | YXY4NG | `hours[]`: `airport`, `time_utc`, `time_local`, `horizon_h`, `issue_utc`, `predicted_arrivals`, `interval_low`, `interval_high` (80% range from validation errors at that horizon), `baseline_arrivals`, `scheduled_arrivals`, `actual_arrivals` (null if not yet known), `top_factors[]` |
+| `aar_metrics.json` | YXY4NG | `selected_model` + `selected_on` ("validation"), `models[]` with `name`, `validation_rmse`, `test_rmse` and `test_mae` (overall, per airport, per airport × horizon), `baseline` (same fields), `failure_cases[]` |
+| `delay_flights.json` | Calvin | `flights[]`: `flight_id`, `airport`, `direction` (departure/arrival), `carrier`, `flight_number`, `origin`, `dest`, `sched_utc`, `sched_local`, `horizon_h`, `issue_utc`, `risk` (0–1), `alert` (risk ≥ `threshold`), `baseline_rate`, `actual_severe` (null if unknown), `top_factors[]` |
+| `delay_metrics.json` | Calvin | `threshold` (max F1 on validation, D21), `selected_model`, `models[]` with `pr_auc`, `precision`, `recall`, `accuracy`, `f1`, `confusion_matrix` {`tp`,`fp`,`fn`,`tn`} on test, overall and per airport × direction; `baseline` (same fields); `failure_cases[]` |
+| `delay_trends.json` | Calvin | `severe_rate` tables (rates, never raw minutes) by airport × direction × {`month`, `local_hour`, `weather_group`}, each cell with `rate` and `n` |
+
+Shared shapes:
+- `top_factors[]` (D27): up to 5 × {`feature`, `label` (plain words), `value`, `shap`, `observed_utc` (timestamp of the weather reading, null for schedule features)}.
+- `failure_cases[]` (D28): {`airport`, `time_utc`, `what_happened`, `predicted`, `actual`, `reason`, `how_user_knows`}.
+- **Demo window (needs a decision):** export the **whole test period** (large: ~76k AAR rows, likely tens of MB) or **only chosen demo days** (e.g. 3–5 test days incl. one severe-weather day and one failure day) for the risk board, with metrics always on the full test period.
+
+### D39 options: airport data for any airport code (D13)
+
+| Option | What it gives | Package |
+|---|---|---|
+| **A. Meteostat station list + OurAirports** (recommended) | Meteostat `stations/lite.json` maps ICAO → weather station id + IANA time zone (checked: KATL → 72219, America/New_York; KORD → 72530); OurAirports `airports.csv` maps IATA ↔ ICAO; `runways.csv` gives runway headings. Both public, fetched by script | none (urllib + pandas) |
+| B. OpenFlights `airports.dat` | IATA, ICAO, coordinates, IANA time zone in one file; no runways; data not updated since ~2017 | none |
+| C. `airportsdata` Python package | IATA/ICAO, coordinates, time zone; no runways; needs a weather-station lookup anyway | adds a package |
+
+Runway heading for a new airport: the brief only fixes ATL/DFW; for others, use the most common runway direction from OurAirports and state it as an assumption.
+
 ## Assumptions to state in the demo
 
 - [ ] Runway headings ATL 80°, DFW 180° (brief)
@@ -177,7 +205,7 @@ Status: BTS fetch and build done (14:40); training running (started 14:45).
   - D23 row: "approved by a team member in chat" — which team member?
 
 ### 4. Pipeline → app contract — YXY4NG (D41)
-- [ ] Define contract (D24, D35)
+- [~] Define contract (D24, D35) (YXY4NG + Claude) — D35 proposal drafted above, waiting for approval
 - [ ] Export predictions
 
 ### 5. App (Next.js) — YXY4NG (D41)
