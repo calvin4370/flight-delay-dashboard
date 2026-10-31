@@ -24,20 +24,20 @@ export default function Briefing({ airport, date, horizon }: { airport: string; 
 
   return (
     <section>
-      <h2 className="mb-1 font-semibold">Shift briefing (Claude)</h2>
-      <p className="mb-2 text-xs text-neutral-500">
-        Restates model outputs and cited, timestamped signals only. It never adds numbers; the TMC decides.
+      <h2 className="mb-1 text-base font-semibold">Shift briefing</h2>
+      <p className="mb-2 text-xs text-[var(--muted)]">
+        Written by Claude from this page&apos;s numbers and timestamped signals only. It adds no numbers of its own.
       </p>
       <button onClick={run} disabled={loading} aria-busy={loading}
-        className="rounded bg-neutral-900 px-3 py-1.5 text-white transition-transform duration-150 ease-out active:scale-[0.97] motion-reduce:transform-none disabled:opacity-60 dark:bg-white dark:text-black">
-        {loading ? "Writing…" : `Brief ${airport} ${date}, ${horizon} h ahead`}
+        className="press control w-full bg-[var(--ink)] text-[var(--panel)] disabled:opacity-60">
+        {loading ? "Writing briefing…" : "Write shift briefing"}
       </button>
-      {result?.error && <p className="mt-2 text-xs text-amber-700 dark:text-amber-400">{result.error}</p>}
-      {result?.briefing && <div className="reveal mt-2 whitespace-pre-wrap rounded bg-neutral-100 p-2 text-xs dark:bg-neutral-900">{result.briefing}</div>}
+      {result?.error && <p className="mt-2 rounded-md bg-[var(--watch-bg)] p-2 text-xs text-[var(--watch)]">{result.error}</p>}
+      {result?.briefing && <div className="reveal mt-2 whitespace-pre-wrap rounded-md border border-[var(--line)] bg-[var(--panel)] p-3 text-xs leading-relaxed">{result.briefing}</div>}
       {result && (
         <details className="mt-2 text-xs">
-          <summary className="cursor-pointer text-neutral-500">Facts given to Claude (source of every number)</summary>
-          <pre className="max-h-64 overflow-auto rounded bg-neutral-100 p-2 dark:bg-neutral-900">{JSON.stringify(result.facts, null, 1)}</pre>
+          <summary className="cursor-pointer text-[var(--muted)]">Facts given to Claude (source of every number)</summary>
+          <pre className="max-h-64 overflow-auto rounded-md border border-[var(--line)] bg-[var(--panel)] p-2">{JSON.stringify(result.facts, null, 1)}</pre>
         </details>
       )}
     </section>

@@ -1,8 +1,42 @@
 @import "tailwindcss";
 
+/* Operate-mode palette: neutral surfaces, one slate-blue accent, red/amber reserved for status. */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --surface: #f6f7f9;
+  --panel: #ffffff;
+  --ink: #14181f;
+  --muted: #5b6472; /* 5.9:1 on white */
+  --line: #e1e4e9;
+  --hover: #f1f3f6;
+  --track: #e6e9ee;
+  --accent: #2f5d8a;
+  --accent-bg: #dce7f2;
+  --act: #b42318;
+  --act-bg: #fde4e1;
+  --watch: #9a5b00;
+  --watch-bg: #fdf0d5;
+  --good: #1f6f43;
+  --background: var(--surface);
+  --foreground: var(--ink);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface: #0f1217;
+    --panel: #161a21;
+    --ink: #e8ebf0;
+    --muted: #9aa3b1;
+    --line: #262c36;
+    --hover: #1c212a;
+    --track: #262c36;
+    --accent: #7fa8d1;
+    --accent-bg: #1d2c3d;
+    --act: #ff8a7a;
+    --act-bg: #3a1714;
+    --watch: #f2b552;
+    --watch-bg: #33240b;
+    --good: #6fcf97;
+  }
 }
 
 @theme inline {
@@ -12,40 +46,47 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--surface);
+  color: var(--ink);
   font-family: var(--font-sans), system-ui, sans-serif;
 }
 
-/* Browser surfaces themed from the palette: selection, focus, scrollbars, table numerals. */
+/* Browser surfaces themed from the palette: selection, focus, scrollbars. */
 ::selection {
-  background: color-mix(in oklab, #0369a1 25%, transparent);
+  background: color-mix(in oklab, var(--accent) 25%, transparent);
 }
 :focus-visible {
-  outline: 2px solid #0369a1;
+  outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 html {
-  scrollbar-color: color-mix(in oklab, var(--foreground) 30%, transparent) transparent;
+  scrollbar-color: color-mix(in oklab, var(--ink) 25%, transparent) transparent;
 }
-th {
-  font-weight: 500;
-  padding: 0.25rem 0.5rem 0.25rem 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--foreground) 15%, transparent);
-}
-td {
-  padding: 0.25rem 0.5rem 0.25rem 0;
+summary::-webkit-details-marker {
+  display: none;
 }
 
-/* One-off reveal for the briefing text: fade and settle in, 200ms strong ease-out (emil-design-eng). */
+/* Form controls share one shape. */
+.control {
+  height: 2rem;
+  border: 1px solid var(--line);
+  border-radius: 0.375rem;
+  background: var(--panel);
+  color: var(--ink);
+  padding: 0 0.625rem;
+  font-size: 0.875rem;
+}
+
+/* Press feedback for every pressable element: 150ms strong ease-out (emil-design-eng). */
+.press {
+  transition: transform 150ms cubic-bezier(0.23, 1, 0.32, 1), background-color 150ms ease, color 150ms ease;
+}
+.press:active {
+  transform: scale(0.97);
+}
+
+/* One-off reveal for the briefing text: fade and settle in, 200ms strong ease-out. */
 .reveal {
   opacity: 1;
   transform: translateY(0);
@@ -55,7 +96,11 @@ td {
     transform: translateY(4px);
   }
 }
+
 @media (prefers-reduced-motion: reduce) {
+  .press:active {
+    transform: none;
+  }
   .reveal {
     transform: none;
     transition: opacity 200ms ease;
