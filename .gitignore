@@ -42,3 +42,6 @@ docs/problem_statements/*
 data/raw/bts/
 data/processed/
 data/models/
+
+# Impeccable engine binary (platform-specific; installed by npx impeccable install)
+.claude/skills/impeccable/scripts/bin/
