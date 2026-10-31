@@ -1,6 +1,6 @@
 # 3-minute pitch (draft)
 
-Times are targets. Numbers marked *AAR* come from `data/outputs/aar_metrics.json` once YXY4NG's run is in.
+Times are targets. Numbers from `docs/EVALUATION.md`.
 
 ## 0:00–0:30 · The user and the problem (problem realism)
 - Our user is the **Traffic Management Coordinator** at Atlanta or Dallas Fort Worth: the person who sets the airport's arrival rate and asks for ground delay programs.
@@ -19,7 +19,7 @@ Times are targets. Numbers marked *AAR* come from `data/outputs/aar_metrics.json
 - Delay risk: **PR-AUC 0.235 vs 0.157**, precision 24% vs 17%, **32% fewer false alarms** while catching 6% more severe flights.
 - Useful even 12 hours out (PR-AUC 0.229 vs 0.157).
 - Weather is what makes the difference: adding it to the schedule raises PR-AUC by 16–18% for every algorithm we tried.
-- AAR: *RMSE model vs baseline (AAR)*.
+- Arrivals per hour: **RMSE 8.7 vs 11.3** for the baseline, 23% less error, steady from 3 to 12 h ahead. A schedule-only time-series model (SARIMAX) is more accurate still (7.5), but it can't say why; we report it and keep the explainable weather model.
 
 ## 2:00–2:30 · Where it fails, and how the TMC knows (trust & traceability)
 - 28 December 2024, Atlanta: 7 severe delays, none flagged. The cause was knock-on delays from the network (late aircraft, air traffic system), with no severe weather at ATL.

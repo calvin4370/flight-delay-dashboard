@@ -59,4 +59,31 @@ On test, LightGBM and XGBoost score slightly higher than the selected Random For
 
 ## AAR regressor (bonus)
 
-*To be added by YXY4NG from `data/outputs/aar_metrics.json`.*
+**Target:** AAR proxy = realised arrivals (wheels-on) per airport per UTC hour, from full BTS on-time data (D8). Not the FAA's declared rate.
+**Inputs:** scheduled arrivals for the hour, calendar, and weather observed at least *h* hours before (same rule as the delay model). Pipeline: `pipeline/fetch_bts.py`, `build_aar.py`, `train_aar.py`, `export_aar.py` (YXY4NG).
+
+### Results on the test period (Jul 2024–Jul 2025, 75,996 airport-hour × horizon rows)
+
+| | Validation RMSE | Test RMSE | Test MAE |
+|---|---|---|---|
+| Baseline: 2023 average arrivals by airport × hour × day of week × month | 9.63 | 11.29 | 7.60 |
+| **LightGBM** (selected among the weather models on validation) | 7.30 | **8.74** | 5.71 |
+| XGBoost | 7.45 | 8.91 | 5.93 |
+| Random Forest | 7.55 | 8.88 | 5.78 |
+| SARIMAX (schedule-only time series) | 6.93 | 7.51 | 4.76 |
+
+Units: arrivals per hour (ATL averages 37.5, DFW 33.7).
+- The selected model cuts the baseline's error by **23%** (RMSE 8.74 vs 11.29). By airport: ATL 7.07, DFW 10.15.
+- Error barely grows with horizon (ATL 7.03 at 3 h → 7.09 at 12 h).
+- **SARIMAX scores lower** because it uses the arrivals counted up to the forecast time, but it has no weather input and no per-factor evidence; we keep it as a comparison rather than the product model, and state that choice (D44).
+- 80% range from validation errors: about −6 to +9 arrivals around each forecast.
+
+### Failure cases
+
+1. **ATL, 19 Jul 2024, 11:00 UTC:** 11 arrivals against 70 scheduled; forecast 72. The global CrowdStrike IT outage grounded many Delta flights; nothing in weather or schedule shows it. **How the user knows:** actual arrivals fall far below the forecast range in the first hour, and the TMC's live traffic picture shows the gap.
+2. **DFW, 16 Dec 2024, 23:00 UTC:** 0 arrivals against 65 scheduled; forecast 69. Arrivals collapsed without a weather signal 3 h earlier (likely a ground stop, outage or data gap).
+
+### Limits
+
+- Throughput is not capacity: in quiet hours arrivals are limited by demand, not by the airport.
+- Weather observations only, no forecasts; outages and ground stops are invisible.
