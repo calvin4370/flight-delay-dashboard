@@ -20,7 +20,7 @@ Open before starting: `http://localhost:3005/?view=delay&airport=ATL&date=2025-0
 **[Tab 4 · Model evidence]**
 
 - Tested once on a full unseen year against the historical rate: precision **24% vs 17%**, **32% fewer false alarms**, 6% more late flights caught.
-- **[Known failure day 2024-12-28 on Tab 1]** Where it fails: 28 December, seven late flights, none flagged. The delays came from the network, not ATL's weather. The coordinator sees it: low risk and calm runway wind, so the score is not the whole story.
+- **[Known failure day 2024-12-28 on Tab 1]** Where it fails: 28 December, seven late flights, none flagged. The delays came from the network, not ATL's weather. The coordinator sees it: low risk and a steady headwind with no tailwind, so the score is not the whole story.
 
 ---
 
@@ -29,7 +29,7 @@ Open before starting: `http://localhost:3005/?view=delay&airport=ATL&date=2025-0
 **[Tab 2 · Arrival capacity, same day]**
 
 - For each hour: how many aircraft will land, with an **80% range**, against the schedule, and what actually landed.
-- **[Click a shaded hour]** Why the forecast is low, with the time of each weather reading, and the rule that fired.
+- **[Click an hour marked Act or Watch]** Why the forecast is low, with the time of each weather reading, and the rule that fired.
 - **[Runway wind strip]** We use crosswind and tailwind on the runway heading, not raw wind speed.
 
 **[Side panel]**
