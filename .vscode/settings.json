@@ -1,0 +1,19 @@
+{
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/.next": true,
+    "**/.venv": true,
+    "**/__pycache__": true,
+    "**/.git": true,
+    "next-env.d.ts": true,
+    "tsconfig.tsbuildinfo": true,
+    "skills-lock.json": true,
+    "data/raw/bts": true,
+    "data/processed": true,
+    "data/models": true
+  },
+  "search.exclude": {
+    "data/outputs/*.json": true,
+    "data/raw": true
+  }
+}

@@ -7,7 +7,8 @@ Baseline: mean arrivals in the training period for the same airport, local hour,
 
 Usage: uv run python pipeline/train_aar.py [--trials 20] [--minutes-per-model 4]
 Reads data/processed/aar_features.csv.gz and aar_hourly.csv.gz.
-Writes data/models/aar_*.joblib, data/outputs/aar_metrics.json, aar_test_predictions.csv, aar_largest_errors.csv.
+Writes data/models/aar_*.joblib, data/outputs/aar_metrics.json, and data/processed/aar_test_predictions.csv +
+aar_largest_errors.csv (intermediate, read by export_aar.py).
 """
 
 import argparse
@@ -264,9 +265,9 @@ def main() -> None:
             "win_max_crosswind", "win_max_tailwind"]
     h3 = test[test["horizon_h"] == 3].assign(error=lambda d: d[best] - d[TARGET])
     h3.reindex(h3["error"].abs().sort_values(ascending=False).index)[cols + ["error"]].head(30).to_csv(
-        OUTPUTS / "aar_largest_errors.csv", index=False)
+        PROC / "aar_largest_errors.csv", index=False)
     test[["airport", "time_utc", "local_hour", "horizon_h", TARGET, "scheduled_arrivals", *models]].to_csv(
-        OUTPUTS / "aar_test_predictions.csv", index=False)
+        PROC / "aar_test_predictions.csv", index=False)
     (OUTPUTS / "aar_metrics.json").write_text(json.dumps(metrics, indent=2, default=str))
 
     print(json.dumps({"validation_rmse": metrics["validation_rmse"], "test_rmse_all": metrics["test_rmse"]["all"],

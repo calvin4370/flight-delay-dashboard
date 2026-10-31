@@ -2,7 +2,7 @@
 
 Usage: uv run python pipeline/export_aar.py   (after train_aar.py)
 Reads data/processed/aar_features.csv.gz, data/models/aar_<selected>.joblib, data/outputs/aar_metrics.json and
-data/outputs/aar_test_predictions.csv. Writes data/outputs/aar_forecast.json and rewrites aar_metrics.json in D35 shape.
+data/processed/aar_test_predictions.csv. Writes data/outputs/aar_forecast.json and rewrites aar_metrics.json in D35 shape.
 """
 
 import json
@@ -70,7 +70,7 @@ def main() -> None:
         contrib = shap.TreeExplainer(model).shap_values(x)
         contrib = np.column_stack([contrib, np.zeros(len(x))])
     pred = model.predict(x)
-    preds = pd.read_csv(OUTPUTS / "aar_test_predictions.csv", parse_dates=["time_utc"])
+    preds = pd.read_csv(PROC / "aar_test_predictions.csv", parse_dates=["time_utc"])
     test = test.merge(preds[["airport", "time_utc", "horizon_h", "baseline", "sarimax"]],
                       on=["airport", "time_utc", "horizon_h"], how="left")
     interval = raw["interval_80_by_horizon"]
@@ -111,7 +111,7 @@ def main() -> None:
         "hours": hours}, separators=(",", ":")))
 
     # Failure cases (D28): largest misses of the selected model at the 3 h horizon.
-    errs = pd.read_csv(OUTPUTS / "aar_largest_errors.csv", parse_dates=["time_utc"])
+    errs = pd.read_csv(PROC / "aar_largest_errors.csv", parse_dates=["time_utc"])
     failure_cases = []
     for _, e in errs.head(5).iterrows():
         local_day = (e["time_utc"] + pd.Timedelta(hours=float(((e["local_hour"] - e["time_utc"].hour + 12) % 24) - 12))).strftime("%Y-%m-%d")
