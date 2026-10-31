@@ -89,6 +89,8 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D34 | AAR regressor mirrors the delay model: horizons 3/6/9/12 h as an input; features = scheduled arrivals that hour + calendar (hour, day of week, month) + weather lookbacks incl. crosswind/tailwind + 3–12 h window summaries; same D11 split | Calvin |
 | D37 | D35 and D36 are drafted by Claude as *Open* proposals when the work starts, and approved by a team member before anything is built on them | Calvin |
 | D40 | Flight local times are converted to UTC (per airport time zone) before matching to the hourly weather | Calvin |
+| D41 | Workload split as in "Workload split" below | Calvin, YXY4NG |
+| D42 | Weather features per horizon (brief: at horizon h, only weather observed ≥ h hours before): the reading at h hours before + summaries of the 10 hours ending there; applies to D12 and D34 | Calvin |
 
 ### Open
 
@@ -98,9 +100,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D35 | JSON field definitions for each output file (D24); Claude drafts per D37 |
 | D36 | The specific recommendation rules and their thresholds (D26); Claude drafts per D37 |
 | D39 | Which public airport database (D13), and any package needed for the weather/airport fetch |
-| D41 | Workload split between Calvin and YXY4NG (see "Workload split", *Proposed*) |
-| D42 | Per-horizon reading of the window features in D12/D34: for a forecast h hours ahead, use the latest observation at h hours plus the 10 hours ending there (as `build_aar.py` does)? |
-| D43 | Arrivals in the repeated autumn daylight-saving hour are dropped (added to Assumptions by YXY4NG's Claude; needs a human decision) |
+| D43 | Flights in the repeated autumn daylight-saving hour (not covered by the brief; affects only the AAR pipeline, 0 delay-model flights): YXY4NG decides and states it as an assumption |
 
 ## Assumptions to state in the demo
 
@@ -113,7 +113,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 
 ---
 
-## Workload split (*Proposed*: Calvin and YXY4NG to confirm → D41)
+## Workload split (D41, decided)
 
 Goal: each person works in their own files and branch, so changes land one after another without merge clashes.
 
@@ -146,7 +146,7 @@ Goal: each person works in their own files and branch, so changes land one after
 - [x] Add approved packages (D23) (Claude, `448d61e`) — lightgbm, optuna, statsmodels, scikit-learn, xgboost; shap still to add
 - [x] Ignore large generated data: `data/raw/bts/`, `data/processed/`, `data/models/` in `.gitignore` (Claude)
 
-### 1. Data pipeline — delay side: Calvin · any-airport fetch: YXY4NG (proposed, D41)
+### 1. Data pipeline — delay side: Calvin · any-airport fetch: YXY4NG (D41)
 - [ ] Load provided data (D30) and fetch external data by script (D7, D13)
 - [ ] Build prediction targets (D3, D9)
 - [ ] Convert flight times to UTC (D40) and join weather under the 3-hour rule (D4, D10)
@@ -156,14 +156,14 @@ Goal: each person works in their own files and branch, so changes land one after
 - [ ] Cite all data sources
 - [~] Hourly weather fetch for any airport code (D13) (Claude) — `scripts/fetch_weather.py` (Meteostat bulk, not committed) reproduces the provided ATL/DFW file 100%; to move into `pipeline/` (D15); airport database still waits on D39
 
-### 2. Delay classifier (D16, D17) — Calvin (proposed, D41)
+### 2. Delay classifier (D16, D17) — Calvin (D41)
 - [ ] Baseline (D22)
 - [ ] Train RF, XGBoost, LightGBM with Optuna on PR-AUC (D20) using the split (D11)
 - [ ] Threshold by max F1 on validation (D21)
 - [ ] Report precision, recall, accuracy, confusion matrix vs baseline
 - [ ] Prediction explanations (D27)
 
-### 3. AAR regressor (D5, D16, D18) — YXY4NG (proposed, D41)
+### 3. AAR regressor (D5, D16, D18) — YXY4NG (D41)
 Status: code written and on `main`; **not run end to end yet**. BTS download in progress.
 - [~] BTS fetch (D7) (Claude) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
 - [~] AAR target and features (D8, D34) (Claude) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
@@ -177,27 +177,27 @@ Status: code written and on `main`; **not run end to end yet**. BTS download in 
   - SARIMAX has no weather input and is one model per airport (D34 lists weather features; D16 says each model covers both airports)
   - D23 row: "approved by a team member in chat" — which team member?
 
-### 4. Pipeline → app contract — YXY4NG (proposed, D41)
+### 4. Pipeline → app contract — YXY4NG (D41)
 - [ ] Define contract (D24, D35)
 - [ ] Export predictions
 
-### 5. App (Next.js) — YXY4NG (proposed, D41)
+### 5. App (Next.js) — YXY4NG (D41)
 - [ ] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance
 - [ ] Recommendations (D26, D36)
 - [ ] Explanations / traceability in the UI (D27)
 - [ ] Uncertainty visible; the user makes the final call
 
-### 6. Claude in the app — YXY4NG (proposed, D41)
+### 6. Claude in the app — YXY4NG (D41)
 - [ ] TMC briefing (D14)
 
-### 7. Evaluation — each owner writes their model's results; Calvin assembles (proposed, D41)
+### 7. Evaluation — each owner writes their model's results; Calvin assembles (D41)
 - [ ] Results: baselines vs models (delays and AAR)
 - [ ] Failure case with a reason, and how the user knows (D28)
 - [ ] Run on dates/flights beyond the demo
 - [ ] Impact: before/after vs baseline, measured vs estimated kept separate
 - [ ] Realistic adoption constraints
 
-### 8. Pitch and submission — Calvin (proposed, D41)
+### 8. Pitch and submission — Calvin (D41)
 - [ ] TMC's current process and the cost of reacting late (problem realism)
 - [ ] State assumptions; cite data sources
 - [ ] First valid submission (D32)
