@@ -96,12 +96,13 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D39 | Airport data: option A (Meteostat station list + OurAirports), no new package | Claude (delegated by Calvin) |
 | D43 | Flights in the repeated autumn daylight-saving hour are dropped; stated as an assumption | Claude (delegated by Calvin) |
 | D44 | WS3 review notes: AAR best model is selected on validation RMSE (not test); SARIMAX stays without weather as a time-series comparison, stated in results; YXY4NG fills in who approved xgboost in D23 | Claude (delegated by Calvin) |
+| D36 | Recommendation rules R1–R4 as in `src/lib/rules.ts` (R1 forecast < 85% of scheduled and ≥ 5 short → review arrival rate; R2 weather window lowers forecast → brief it with observation time; R3 ≥ 3 flights in one local hour above the D21 threshold → notify airlines / Command Center; R4 80% range > 60% of forecast → low confidence, check live traffic), approved | Claude (delegated by Calvin) |
 
 ### Open
 
 | # | Question |
 |---|---|
-| D36 | Recommendation rules (D26), **proposal** in `src/lib/rules.ts` and shown in the app as pending: R1 forecast < 85% of scheduled arrivals and ≥ 5 short → review the arrival rate (high if the whole 80% range is below schedule); R2 a weather window factor lowers the forecast → brief it with its observation time; R3 ≥ 3 flights in one local hour above the delay threshold (D21) → notify airlines / Command Center; R4 80% range wider than 60% of the forecast → low confidence, check live traffic. Needs a team member to approve |
+| — | none |
 
 ### D35 output JSON contract (approved, see D35 above)
 
