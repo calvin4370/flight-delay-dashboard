@@ -1,0 +1,426 @@
+{
+  "target": "severe = DEP_DELAY > 45 (departures) / ARR_DELAY > 45 (arrivals) at ATL/DFW (D3)",
+  "split": {
+    "train": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "validation": [
+      "2024-01-01",
+      "2024-06-30"
+    ],
+    "test": [
+      "2024-07-01",
+      "2025-07-31"
+    ]
+  },
+  "best_model": "random_forest",
+  "selected_on": "validation PR-AUC",
+  "threshold_rule": "max F1 on validation (D21)",
+  "validation_pr_auc": {
+    "baseline": 0.14736615685767906,
+    "random_forest": 0.22490087080273824,
+    "xgboost": 0.2225842763996635,
+    "lightgbm": 0.22082346623151444
+  },
+  "thresholds": {
+    "baseline": 0.13333333333333333,
+    "random_forest": 0.14086773927619728,
+    "xgboost": 0.20120282471179962,
+    "lightgbm": 0.27231777566533694
+  },
+  "best_params": {
+    "random_forest": {
+      "n_estimators": 224,
+      "max_depth": 20,
+      "min_samples_leaf": 27,
+      "max_features": 0.3164303216418849,
+      "class_weight": null
+    },
+    "xgboost": {
+      "n_estimators": 447,
+      "learning_rate": 0.014928527979807486,
+      "max_depth": 5,
+      "subsample": 0.7454999442075886,
+      "colsample_bytree": 0.8504858994622705,
+      "min_child_weight": 3.2410010675049414,
+      "reg_lambda": 0.27783801401942176,
+      "scale_pos_weight": 1.509316974390396
+    },
+    "lightgbm": {
+      "n_estimators": 643,
+      "learning_rate": 0.015843306025333414,
+      "num_leaves": 10,
+      "min_child_samples": 26,
+      "subsample": 0.6760812286086547,
+      "colsample_bytree": 0.6193635901182771,
+      "reg_lambda": 0.049192213921907695,
+      "scale_pos_weight": 2.295742583426585
+    }
+  },
+  "trials": {
+    "random_forest": 25,
+    "xgboost": 25,
+    "lightgbm": 25
+  },
+  "test": {
+    "baseline": {
+      "pr_auc": 0.15700856782004513,
+      "threshold": 0.13333333333333333,
+      "precision": 0.16688610928242265,
+      "recall": 0.40788415124698313,
+      "f1": 0.23686054660126138,
+      "accuracy": 0.6979195561719833,
+      "confusion_matrix": {
+        "tn": 28164,
+        "fp": 10124,
+        "fn": 2944,
+        "tp": 2028
+      },
+      "positives": 4972,
+      "rows": 43260
+    },
+    "random_forest": {
+      "pr_auc": 0.2347304345735654,
+      "threshold": 0.14086773927619728,
+      "precision": 0.2376478390626727,
+      "recall": 0.4324215607401448,
+      "f1": 0.30672658534845565,
+      "accuracy": 0.7753351826167361,
+      "confusion_matrix": {
+        "tn": 31391,
+        "fp": 6897,
+        "fn": 2822,
+        "tp": 2150
+      },
+      "positives": 4972,
+      "rows": 43260
+    },
+    "xgboost": {
+      "pr_auc": 0.2403983309074867,
+      "threshold": 0.20120282471179962,
+      "precision": 0.2459618208516887,
+      "recall": 0.40426387771520517,
+      "f1": 0.3058429701765064,
+      "accuracy": 0.7890892279241793,
+      "confusion_matrix": {
+        "tn": 32126,
+        "fp": 6162,
+        "fn": 2962,
+        "tp": 2010
+      },
+      "positives": 4972,
+      "rows": 43260
+    },
+    "lightgbm": {
+      "pr_auc": 0.242275357193323,
+      "threshold": 0.27231777566533694,
+      "precision": 0.24661149094398466,
+      "recall": 0.413515687851971,
+      "f1": 0.30896385904275303,
+      "accuracy": 0.7874017568192325,
+      "confusion_matrix": {
+        "tn": 32007,
+        "fp": 6281,
+        "fn": 2916,
+        "tp": 2056
+      },
+      "positives": 4972,
+      "rows": 43260
+    }
+  },
+  "test_by_horizon": {
+    "3": {
+      "baseline": {
+        "pr_auc": 0.15700856782004513,
+        "threshold": 0.13333333333333333,
+        "precision": 0.16688610928242265,
+        "recall": 0.40788415124698313,
+        "f1": 0.23686054660126138,
+        "accuracy": 0.6979195561719833,
+        "confusion_matrix": {
+          "tn": 7041,
+          "fp": 2531,
+          "fn": 736,
+          "tp": 507
+        },
+        "positives": 1243,
+        "rows": 10815
+      },
+      "random_forest": {
+        "pr_auc": 0.24223847193442744,
+        "threshold": 0.14086773927619728,
+        "precision": 0.23214285714285715,
+        "recall": 0.4497184231697506,
+        "f1": 0.30621747466447546,
+        "accuracy": 0.765788257050393,
+        "confusion_matrix": {
+          "tn": 7723,
+          "fp": 1849,
+          "fn": 684,
+          "tp": 559
+        },
+        "positives": 1243,
+        "rows": 10815
+      }
+    },
+    "6": {
+      "baseline": {
+        "pr_auc": 0.15700856782004513,
+        "threshold": 0.13333333333333333,
+        "precision": 0.16688610928242265,
+        "recall": 0.40788415124698313,
+        "f1": 0.23686054660126138,
+        "accuracy": 0.6979195561719833,
+        "confusion_matrix": {
+          "tn": 7041,
+          "fp": 2531,
+          "fn": 736,
+          "tp": 507
+        },
+        "positives": 1243,
+        "rows": 10815
+      },
+      "random_forest": {
+        "pr_auc": 0.2351872792135307,
+        "threshold": 0.14086773927619728,
+        "precision": 0.2407982261640798,
+        "recall": 0.43684633950120677,
+        "f1": 0.31046312178387653,
+        "accuracy": 0.7769764216366158,
+        "confusion_matrix": {
+          "tn": 7860,
+          "fp": 1712,
+          "fn": 700,
+          "tp": 543
+        },
+        "positives": 1243,
+        "rows": 10815
+      }
+    },
+    "9": {
+      "baseline": {
+        "pr_auc": 0.15700856782004513,
+        "threshold": 0.13333333333333333,
+        "precision": 0.16688610928242265,
+        "recall": 0.40788415124698313,
+        "f1": 0.23686054660126138,
+        "accuracy": 0.6979195561719833,
+        "confusion_matrix": {
+          "tn": 7041,
+          "fp": 2531,
+          "fn": 736,
+          "tp": 507
+        },
+        "positives": 1243,
+        "rows": 10815
+      },
+      "random_forest": {
+        "pr_auc": 0.2358353578727162,
+        "threshold": 0.14086773927619728,
+        "precision": 0.24278515803939532,
+        "recall": 0.4263877715205149,
+        "f1": 0.30939871570344424,
+        "accuracy": 0.7812297734627832,
+        "confusion_matrix": {
+          "tn": 7919,
+          "fp": 1653,
+          "fn": 713,
+          "tp": 530
+        },
+        "positives": 1243,
+        "rows": 10815
+      }
+    },
+    "12": {
+      "baseline": {
+        "pr_auc": 0.15700856782004513,
+        "threshold": 0.13333333333333333,
+        "precision": 0.16688610928242265,
+        "recall": 0.40788415124698313,
+        "f1": 0.23686054660126138,
+        "accuracy": 0.6979195561719833,
+        "confusion_matrix": {
+          "tn": 7041,
+          "fp": 2531,
+          "fn": 736,
+          "tp": 507
+        },
+        "positives": 1243,
+        "rows": 10815
+      },
+      "random_forest": {
+        "pr_auc": 0.22862081079056676,
+        "threshold": 0.14086773927619728,
+        "precision": 0.23534756928668787,
+        "recall": 0.416733708769107,
+        "f1": 0.3008130081300813,
+        "accuracy": 0.7773462783171521,
+        "confusion_matrix": {
+          "tn": 7889,
+          "fp": 1683,
+          "fn": 725,
+          "tp": 518
+        },
+        "positives": 1243,
+        "rows": 10815
+      }
+    }
+  },
+  "test_by_airport_direction": {
+    "ATL arrival": {
+      "baseline": {
+        "pr_auc": 0.14146793593958942,
+        "threshold": 0.13333333333333333,
+        "precision": 0.13657770800627944,
+        "recall": 0.42028985507246375,
+        "f1": 0.20616113744075829,
+        "accuracy": 0.7083151937309534,
+        "confusion_matrix": {
+          "tn": 6160,
+          "fp": 2200,
+          "fn": 480,
+          "tp": 348
+        },
+        "positives": 828,
+        "rows": 9188
+      },
+      "random_forest": {
+        "pr_auc": 0.21620696874314954,
+        "threshold": 0.14086773927619728,
+        "precision": 0.21206993795826284,
+        "recall": 0.45410628019323673,
+        "f1": 0.289119569396386,
+        "accuracy": 0.7987592511972138,
+        "confusion_matrix": {
+          "tn": 6963,
+          "fp": 1397,
+          "fn": 452,
+          "tp": 376
+        },
+        "positives": 828,
+        "rows": 9188
+      }
+    },
+    "ATL departure": {
+      "baseline": {
+        "pr_auc": 0.1656996683440198,
+        "threshold": 0.13333333333333333,
+        "precision": 0.17379679144385027,
+        "recall": 0.3439153439153439,
+        "f1": 0.23090586145648312,
+        "accuracy": 0.7486211901306241,
+        "confusion_matrix": {
+          "tn": 9796,
+          "fp": 2472,
+          "fn": 992,
+          "tp": 520
+        },
+        "positives": 1512,
+        "rows": 13780
+      },
+      "random_forest": {
+        "pr_auc": 0.27501955985299886,
+        "threshold": 0.14086773927619728,
+        "precision": 0.2682826622843057,
+        "recall": 0.43187830687830686,
+        "f1": 0.3309680689305626,
+        "accuracy": 0.8084179970972424,
+        "confusion_matrix": {
+          "tn": 10487,
+          "fp": 1781,
+          "fn": 859,
+          "tp": 653
+        },
+        "positives": 1512,
+        "rows": 13780
+      }
+    },
+    "DFW arrival": {
+      "baseline": {
+        "pr_auc": 0.1459510116910095,
+        "threshold": 0.13333333333333333,
+        "precision": 0.15789473684210525,
+        "recall": 0.3424657534246575,
+        "f1": 0.21613832853025935,
+        "accuracy": 0.6844547563805105,
+        "confusion_matrix": {
+          "tn": 4420,
+          "fp": 1600,
+          "fn": 576,
+          "tp": 300
+        },
+        "positives": 876,
+        "rows": 6896
+      },
+      "random_forest": {
+        "pr_auc": 0.1885828731980193,
+        "threshold": 0.14086773927619728,
+        "precision": 0.2003504672897196,
+        "recall": 0.3915525114155251,
+        "f1": 0.2650695517774343,
+        "accuracy": 0.7241879350348028,
+        "confusion_matrix": {
+          "tn": 4651,
+          "fp": 1369,
+          "fn": 533,
+          "tp": 343
+        },
+        "positives": 876,
+        "rows": 6896
+      }
+    },
+    "DFW departure": {
+      "baseline": {
+        "pr_auc": 0.16823412565606924,
+        "threshold": 0.13333333333333333,
+        "precision": 0.18251273344651953,
+        "recall": 0.489749430523918,
+        "f1": 0.2659245516388373,
+        "accuracy": 0.6455658405494178,
+        "confusion_matrix": {
+          "tn": 7788,
+          "fp": 3852,
+          "fn": 896,
+          "tp": 860
+        },
+        "positives": 1756,
+        "rows": 13396
+      },
+      "random_forest": {
+        "pr_auc": 0.24602530495706665,
+        "threshold": 0.14086773927619728,
+        "precision": 0.24872122762148338,
+        "recall": 0.4430523917995444,
+        "f1": 0.3185913185913186,
+        "accuracy": 0.7515676321289937,
+        "confusion_matrix": {
+          "tn": 9290,
+          "fp": 2350,
+          "fn": 978,
+          "tp": 778
+        },
+        "positives": 1756,
+        "rows": 13396
+      }
+    }
+  },
+  "mean_abs_shap_top15": {
+    "local_hour": 0.031,
+    "wx_dewpoint_c": 0.0154,
+    "month": 0.0137,
+    "wx_temp_c": 0.0101,
+    "wx_pressure_hpa": 0.0097,
+    "carrier": 0.0096,
+    "distance": 0.0068,
+    "day_of_week": 0.0062,
+    "win_max_tailwind": 0.0041,
+    "wx_condition_code": 0.004,
+    "win_pressure_change": 0.0031,
+    "win_max_crosswind": 0.0026,
+    "wx_crosswind_kmh": 0.0026,
+    "wx_rel_humidity_pct": 0.0025,
+    "wx_headwind_kmh": 0.0022
+  },
+  "runtime_minutes": 28.9
+}

@@ -1,0 +1,1158 @@
+{
+  "generated_utc": "2026-10-31T07:16:18Z",
+  "source": "pipeline/export_delay.py (from train_delay.py)",
+  "split": {
+    "train": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "validation": [
+      "2024-01-01",
+      "2024-06-30"
+    ],
+    "test": [
+      "2024-07-01",
+      "2025-07-31"
+    ]
+  },
+  "period": [
+    "2023-01-01",
+    "2025-07-31"
+  ],
+  "note": "share of flights with DEP_DELAY / ARR_DELAY > 45 (rates, not raw minutes); weather group = condition in the scheduled hour (descriptive history, not a model input)",
+  "severe_rate": {
+    "month": [
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 1,
+        "rate": 0.0888,
+        "n": 473
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 2,
+        "rate": 0.0464,
+        "n": 453
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 3,
+        "rate": 0.087,
+        "n": 506
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 4,
+        "rate": 0.0818,
+        "n": 501
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 5,
+        "rate": 0.0793,
+        "n": 542
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 6,
+        "rate": 0.1215,
+        "n": 576
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 7,
+        "rate": 0.1679,
+        "n": 548
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 8,
+        "rate": 0.1048,
+        "n": 353
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 9,
+        "rate": 0.0593,
+        "n": 337
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 10,
+        "rate": 0.0455,
+        "n": 374
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 11,
+        "rate": 0.0512,
+        "n": 371
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "month": 12,
+        "rate": 0.0795,
+        "n": 327
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 1,
+        "rate": 0.0928,
+        "n": 733
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 2,
+        "rate": 0.0563,
+        "n": 710
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 3,
+        "rate": 0.0971,
+        "n": 814
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 4,
+        "rate": 0.0853,
+        "n": 797
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 5,
+        "rate": 0.1089,
+        "n": 836
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 6,
+        "rate": 0.1274,
+        "n": 824
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 7,
+        "rate": 0.18,
+        "n": 839
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 8,
+        "rate": 0.1039,
+        "n": 558
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 9,
+        "rate": 0.0636,
+        "n": 550
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 10,
+        "rate": 0.0384,
+        "n": 573
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 11,
+        "rate": 0.0349,
+        "n": 545
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "month": 12,
+        "rate": 0.078,
+        "n": 564
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 1,
+        "rate": 0.1071,
+        "n": 336
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 2,
+        "rate": 0.1003,
+        "n": 299
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 3,
+        "rate": 0.1618,
+        "n": 377
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 4,
+        "rate": 0.1211,
+        "n": 380
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 5,
+        "rate": 0.1578,
+        "n": 393
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 6,
+        "rate": 0.1503,
+        "n": 386
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 7,
+        "rate": 0.1671,
+        "n": 431
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 8,
+        "rate": 0.1124,
+        "n": 258
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 9,
+        "rate": 0.0516,
+        "n": 252
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 10,
+        "rate": 0.0399,
+        "n": 276
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 11,
+        "rate": 0.0865,
+        "n": 266
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "month": 12,
+        "rate": 0.0669,
+        "n": 269
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 1,
+        "rate": 0.1205,
+        "n": 664
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 2,
+        "rate": 0.0886,
+        "n": 643
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 3,
+        "rate": 0.1401,
+        "n": 735
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 4,
+        "rate": 0.1485,
+        "n": 707
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 5,
+        "rate": 0.1727,
+        "n": 747
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 6,
+        "rate": 0.1773,
+        "n": 784
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 7,
+        "rate": 0.1852,
+        "n": 810
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 8,
+        "rate": 0.1241,
+        "n": 532
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 9,
+        "rate": 0.0964,
+        "n": 498
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 10,
+        "rate": 0.0677,
+        "n": 532
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 11,
+        "rate": 0.0669,
+        "n": 478
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "month": 12,
+        "rate": 0.0956,
+        "n": 481
+      }
+    ],
+    "local_hour": [
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 0,
+        "rate": 0.1319,
+        "n": 91
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 1,
+        "rate": 0.0625,
+        "n": 16
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 2,
+        "rate": 0.0,
+        "n": 1
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 4,
+        "rate": 0.0909,
+        "n": 11
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 5,
+        "rate": 0.0597,
+        "n": 67
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 6,
+        "rate": 0.0625,
+        "n": 96
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 7,
+        "rate": 0.0296,
+        "n": 270
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 8,
+        "rate": 0.0292,
+        "n": 411
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 9,
+        "rate": 0.0617,
+        "n": 324
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 10,
+        "rate": 0.0656,
+        "n": 366
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 11,
+        "rate": 0.0488,
+        "n": 246
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 12,
+        "rate": 0.0418,
+        "n": 287
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 13,
+        "rate": 0.041,
+        "n": 293
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 14,
+        "rate": 0.0746,
+        "n": 268
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 15,
+        "rate": 0.0571,
+        "n": 333
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 16,
+        "rate": 0.0593,
+        "n": 270
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 17,
+        "rate": 0.1276,
+        "n": 243
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 18,
+        "rate": 0.1225,
+        "n": 351
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 19,
+        "rate": 0.1356,
+        "n": 354
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 20,
+        "rate": 0.15,
+        "n": 360
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 21,
+        "rate": 0.1624,
+        "n": 394
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 22,
+        "rate": 0.1818,
+        "n": 143
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "local_hour": 23,
+        "rate": 0.1627,
+        "n": 166
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 5,
+        "rate": 0.0556,
+        "n": 54
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 6,
+        "rate": 0.0535,
+        "n": 187
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 7,
+        "rate": 0.0447,
+        "n": 358
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 8,
+        "rate": 0.0502,
+        "n": 677
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 9,
+        "rate": 0.0467,
+        "n": 642
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 10,
+        "rate": 0.0459,
+        "n": 501
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 11,
+        "rate": 0.0643,
+        "n": 560
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 12,
+        "rate": 0.0607,
+        "n": 461
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 13,
+        "rate": 0.0677,
+        "n": 384
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 14,
+        "rate": 0.0819,
+        "n": 415
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 15,
+        "rate": 0.0876,
+        "n": 582
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 16,
+        "rate": 0.1022,
+        "n": 509
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 17,
+        "rate": 0.1778,
+        "n": 388
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 18,
+        "rate": 0.1547,
+        "n": 375
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 19,
+        "rate": 0.1331,
+        "n": 571
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 20,
+        "rate": 0.1406,
+        "n": 448
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 21,
+        "rate": 0.131,
+        "n": 504
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 22,
+        "rate": 0.1287,
+        "n": 614
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "local_hour": 23,
+        "rate": 0.2301,
+        "n": 113
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 0,
+        "rate": 0.1042,
+        "n": 48
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 1,
+        "rate": 0.5,
+        "n": 2
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 2,
+        "rate": 0.0,
+        "n": 1
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 4,
+        "rate": 0.0,
+        "n": 14
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 5,
+        "rate": 0.1,
+        "n": 70
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 6,
+        "rate": 0.0667,
+        "n": 45
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 7,
+        "rate": 0.0575,
+        "n": 226
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 8,
+        "rate": 0.0791,
+        "n": 139
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 9,
+        "rate": 0.0912,
+        "n": 329
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 10,
+        "rate": 0.1028,
+        "n": 214
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 11,
+        "rate": 0.062,
+        "n": 274
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 12,
+        "rate": 0.0877,
+        "n": 171
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 13,
+        "rate": 0.0898,
+        "n": 323
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 14,
+        "rate": 0.0577,
+        "n": 156
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 15,
+        "rate": 0.1145,
+        "n": 262
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 16,
+        "rate": 0.103,
+        "n": 165
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 17,
+        "rate": 0.1508,
+        "n": 305
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 18,
+        "rate": 0.1422,
+        "n": 232
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 19,
+        "rate": 0.1988,
+        "n": 327
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 20,
+        "rate": 0.1826,
+        "n": 115
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 21,
+        "rate": 0.1769,
+        "n": 294
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 22,
+        "rate": 0.1386,
+        "n": 101
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "local_hour": 23,
+        "rate": 0.1727,
+        "n": 110
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 0,
+        "rate": 0.0,
+        "n": 1
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 5,
+        "rate": 0.0625,
+        "n": 96
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 6,
+        "rate": 0.0545,
+        "n": 110
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 7,
+        "rate": 0.0421,
+        "n": 428
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 8,
+        "rate": 0.0639,
+        "n": 767
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 9,
+        "rate": 0.0705,
+        "n": 241
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 10,
+        "rate": 0.0766,
+        "n": 679
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 11,
+        "rate": 0.1321,
+        "n": 318
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 12,
+        "rate": 0.1065,
+        "n": 601
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 13,
+        "rate": 0.1447,
+        "n": 311
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 14,
+        "rate": 0.0988,
+        "n": 506
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 15,
+        "rate": 0.1429,
+        "n": 336
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 16,
+        "rate": 0.1937,
+        "n": 537
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 17,
+        "rate": 0.1897,
+        "n": 427
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 18,
+        "rate": 0.1902,
+        "n": 447
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 19,
+        "rate": 0.1979,
+        "n": 581
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 20,
+        "rate": 0.1765,
+        "n": 408
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 21,
+        "rate": 0.1765,
+        "n": 442
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 22,
+        "rate": 0.1576,
+        "n": 368
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "local_hour": 23,
+        "rate": 0.1429,
+        "n": 7
+      }
+    ],
+    "weather_group": [
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "clear",
+        "rate": 0.0739,
+        "n": 2586
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "cloudy",
+        "rate": 0.0921,
+        "n": 1933
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "fog",
+        "rate": 0.084,
+        "n": 131
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "heavy rain",
+        "rate": 0.124,
+        "n": 121
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "rain",
+        "rate": 0.1204,
+        "n": 565
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "snow/ice",
+        "rate": 0.5,
+        "n": 4
+      },
+      {
+        "airport": "ATL",
+        "direction": "arrival",
+        "weather_group": "thunderstorm",
+        "rate": 0.3125,
+        "n": 16
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "clear",
+        "rate": 0.0714,
+        "n": 3947
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "cloudy",
+        "rate": 0.0977,
+        "n": 3091
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "fog",
+        "rate": 0.0954,
+        "n": 241
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "heavy rain",
+        "rate": 0.191,
+        "n": 199
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "rain",
+        "rate": 0.1515,
+        "n": 845
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "snow/ice",
+        "rate": 1.0,
+        "n": 1
+      },
+      {
+        "airport": "ATL",
+        "direction": "departure",
+        "weather_group": "thunderstorm",
+        "rate": 0.2941,
+        "n": 17
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "clear",
+        "rate": 0.0954,
+        "n": 1928
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "cloudy",
+        "rate": 0.1291,
+        "n": 1588
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "fog",
+        "rate": 0.0857,
+        "n": 70
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "heavy rain",
+        "rate": 0.2651,
+        "n": 83
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "rain",
+        "rate": 0.1597,
+        "n": 238
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "snow/ice",
+        "rate": 0.25,
+        "n": 4
+      },
+      {
+        "airport": "DFW",
+        "direction": "arrival",
+        "weather_group": "thunderstorm",
+        "rate": 0.3,
+        "n": 10
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "clear",
+        "rate": 0.1049,
+        "n": 3840
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "cloudy",
+        "rate": 0.1413,
+        "n": 3014
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "fog",
+        "rate": 0.106,
+        "n": 151
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "heavy rain",
+        "rate": 0.3129,
+        "n": 163
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "rain",
+        "rate": 0.1981,
+        "n": 414
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "snow/ice",
+        "rate": 0.2857,
+        "n": 7
+      },
+      {
+        "airport": "DFW",
+        "direction": "departure",
+        "weather_group": "thunderstorm",
+        "rate": 0.5556,
+        "n": 18
+      }
+    ]
+  }
+}
