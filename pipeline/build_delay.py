@@ -6,7 +6,7 @@ h hours before the scheduled time plus summaries of the 10 hours ending there (D
 h hours old (D4). Flight local times are converted to UTC per airport before matching weather (D40).
 Features (D12): airport, direction, scheduled local hour, day of week, month, carrier, distance + weather.
 
-Usage: uv run python pipeline/build_delay.py [--airports ATL DFW]
+Usage: uv run python pipeline/build_delay.py [--airports ATL DFW]   (any IATA/ICAO code, e.g. KORD; ATL/DFW are scored)
 Reads data/raw/Flight_Data_With_Weather_Final.csv and the hourly weather (via build_aar.weather_features).
 Writes data/processed/delay_features.csv.gz.
 """
@@ -18,7 +18,8 @@ from pathlib import Path
 import pandas as pd
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from build_aar import TIMEZONES, to_iata, weather_features  # shared with the AAR pipeline; not edited here
+from build_aar import to_iata, weather_features  # shared with the AAR pipeline; not edited here
+from fetch_weather import resolve_airport  # any IATA/ICAO code -> time zone, station, runway (D13, D39)
 
 ROOT = Path(__file__).resolve().parent.parent
 FLIGHTS = ROOT / "data" / "raw" / "Flight_Data_With_Weather_Final.csv"
@@ -51,7 +52,7 @@ def targets_for(flights: pd.DataFrame, airport: str) -> pd.DataFrame:
 
     t = pd.concat([dep, arr], ignore_index=True)
     t["airport"] = airport
-    t["sched_utc"] = (t["sched_local"].dt.tz_localize(TIMEZONES[airport], ambiguous="NaT", nonexistent="shift_forward")
+    t["sched_utc"] = (t["sched_local"].dt.tz_localize(resolve_airport(airport)["tz"], ambiguous="NaT", nonexistent="shift_forward")
                       .dt.tz_convert("UTC").dt.tz_localize(None))
     t["severe"] = (t["delay_min"] > SEVERE_MIN).astype("Int64").where(t["delay_min"].notna())
     t["local_hour"] = t["sched_local"].dt.hour
@@ -66,11 +67,12 @@ def targets_for(flights: pd.DataFrame, airport: str) -> pd.DataFrame:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     p.add_argument("--airports", nargs="+", default=["ATL", "DFW"])
+    p.add_argument("--out", type=Path, default=OUT, help="output file (default: the ATL/DFW training features)")
     args = p.parse_args()
     airports = [to_iata(a) for a in args.airports]
-    missing = [a for a in airports if a not in TIMEZONES]
-    if missing:
-        raise SystemExit(f"no time zone / weather configured for {missing} (see D13 / D39)")
+    for a in airports:  # resolves time zone, weather station and runway heading for any code (D13, D39)
+        info = resolve_airport(a)
+        print(f"{a}: {info['name']} | tz {info['tz']} | station {info['station']} | runway {info['runway_heading_deg']} deg ({info['heading_source']})")
 
     flights = pd.read_csv(FLIGHTS, usecols=FLIGHT_COLS, parse_dates=["FL_DATE"], low_memory=False)
     targets = pd.concat([targets_for(flights, a) for a in airports], ignore_index=True)
@@ -101,8 +103,8 @@ def main() -> None:
             "local_date", "sched_local", "sched_utc", "horizon_h", "issue_utc", "delay_min", "severe",
             "OP_CARRIER_FL_NUM", "ORIGIN", "DEST"] + [c for c in wf.columns if c != "issue_utc"]
     feats = feats[keep]
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    feats.to_csv(OUT, index=False)
+    args.out.parent.mkdir(parents=True, exist_ok=True)
+    feats.to_csv(args.out, index=False)
 
     print(f"targets: {n_all:,}; without a delay value (no label): {int(no_label.sum()):,}; "
           f"ambiguous local time: {int(no_time.sum()):,}; labelled: {len(targets):,}")
