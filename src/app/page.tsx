@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { Fragment } from "react";
+import { readFile } from "node:fs/promises";
+import path from "node:path";
 import {
   aarIndex, aarMetrics, delayFailureCases, delayIndex, delayMetrics, delayTrends, HORIZONS,
   type AarHour, type DelayFlight, type DelayMetrics, type DelayScores, type DelayTrends, type FailureCase, type Factor,
@@ -78,7 +81,10 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
         </p>
 
         {(view === "delay" || view === "aar") && (
-          <Controls view={view} airport={airport} airports={airports} date={date} dates={dates} horizon={horizon} notable={notable} />
+          <>
+            <Controls view={view} airport={airport} airports={airports} date={date} dates={dates} horizon={horizon} notable={notable} />
+            <RunwayWind airport={airport} date={date} />
+          </>
         )}
 
         {view === "delay" && (
@@ -443,6 +449,8 @@ async function Evidence({ cases }: { cases: FailureCase[] }) {
       <p className="text-xs text-[var(--muted)]">
         Both models were trained on 2023, tuned on Jan–Jun 2024 and scored once on the unseen test year (Jul 2024 – Jul 2025), against simple historical baselines.
       </p>
+      <Impact />
+
       <section>
         <h2 className="mb-1 text-base font-semibold">Delay model: severe-delay alerts (over 45 min), main target</h2>
         {!dm ? <Missing what="delay_metrics.json" /> : <DelayEvidence m={dm} />}
@@ -555,5 +563,102 @@ function Assumptions() {
       <ul className="grid gap-x-8 gap-y-0.5 md:grid-cols-2">{items.map((t) => <li key={t}>{t}</li>)}</ul>
       <p className="mt-2">Sources: challenge flight and hourly weather files · BTS On-Time Reporting (US DOT) · Meteostat hourly observations (NOAA ISD), stations 72219 ATL, 72259 DFW · OurAirports.</p>
     </footer>
+  );
+}
+
+/* ------------------------------------------------------------------ runway wind (brief: crosswind / tailwind, not raw speed) */
+
+type WindHour = { hour: string; dir: number; speed: number; head: number; cross: number; tail: number; heading: number; utc: string };
+const WEATHER_CSV = path.join(process.cwd(), "data", "raw", "challenge5_hourly_weather_ATL_DFW.csv");
+let windPromise: Promise<Map<string, WindHour[]> | null> | undefined;
+
+// The provided hourly weather already holds the runway components for the brief's headings (ATL 80°, DFW 180°).
+function windIndex() {
+  windPromise ??= readFile(WEATHER_CSV, "utf8").then((text) => {
+    const [head, ...lines] = text.trim().split(/\r?\n/);
+    const col = Object.fromEntries(head.split(",").map((c, i) => [c, i]));
+    const idx = new Map<string, WindHour[]>();
+    for (const line of lines) {
+      const c = line.split(",");
+      const local = c[col.time_local];
+      const key = `${c[col.airport]}|${local.slice(0, 10)}`;
+      const row: WindHour = {
+        hour: local.slice(11, 13), dir: Number(c[col.wind_dir_deg]), speed: Number(c[col.wind_speed_kmh]),
+        head: Number(c[col.headwind_kmh]), cross: Number(c[col.crosswind_kmh]), tail: Number(c[col.tailwind_kmh]),
+        heading: Number(c[col.runway_heading_deg]), utc: c[col.time_utc],
+      };
+      const list = idx.get(key);
+      if (list) list.push(row); else idx.set(key, [row]);
+    }
+    return idx;
+  }).catch(() => null);
+  return windPromise;
+}
+
+async function RunwayWind({ airport, date }: { airport: string; date: string }) {
+  const idx = await windIndex();
+  const hours = idx?.get(`${airport}|${date}`) ?? [];
+  if (hours.length === 0) return null;
+  const heading = hours[0].heading;
+  const max = Math.max(10, ...hours.map((h) => Math.max(h.cross, h.tail, Math.max(0, h.head))));
+  const cell = (v: number, tone: string) => (
+    <td className="px-0.5 py-0.5 text-center">
+      <span className={`block rounded-sm py-0.5 tabular-nums ${v > 0 ? tone : "text-[var(--muted)]"}`}
+        style={v > 0 ? { opacity: 0.35 + 0.65 * Math.min(1, v / max) } : undefined}>{v > 0 ? v.toFixed(0) : "·"}</span>
+    </td>
+  );
+  return (
+    <section aria-labelledby="wind" className="mb-5 overflow-x-auto rounded-md border border-[var(--line)] bg-[var(--panel)] p-3">
+      <h2 id="wind" className="text-xs font-semibold">
+        Runway wind at {airport}, {date} (runway heading {heading}° per the brief) · km/h, hourly observations
+      </h2>
+      <p className="mb-2 text-[11px] text-[var(--muted)]">
+        Both models use crosswind and tailwind on the runway, not raw wind speed. A forecast made <i>h</i> hours ahead only sees
+        readings at least <i>h</i> hours before each flight or hour.
+      </p>
+      <table className="w-full min-w-[42rem] border-collapse text-[11px]">
+        <thead><tr><th className="w-24" />{hours.map((h) => <th key={h.utc} className="px-0.5 font-normal text-[var(--muted)]">{h.hour}</th>)}</tr></thead>
+        <tbody>
+          <tr><th className="pr-2 text-left font-normal text-[var(--muted)]">Crosswind</th>{hours.map((h) => <Fragment key={h.utc}>{cell(h.cross, "bg-[var(--watch-bg)] text-[var(--watch)]")}</Fragment>)}</tr>
+          <tr><th className="pr-2 text-left font-normal text-[var(--muted)]">Tailwind</th>{hours.map((h) => <Fragment key={h.utc}>{cell(h.tail, "bg-[var(--act-bg)] text-[var(--act)]")}</Fragment>)}</tr>
+          <tr><th className="pr-2 text-left font-normal text-[var(--muted)]">Headwind</th>{hours.map((h) => <Fragment key={h.utc}>{cell(Math.max(0, h.head), "bg-[var(--accent-bg)] text-[var(--accent)]")}</Fragment>)}</tr>
+          <tr><th className="pr-2 text-left font-normal text-[var(--muted)]">Wind from</th>{hours.map((h) => <td key={h.utc} className="px-0.5 text-center tabular-nums text-[var(--muted)]">{h.speed > 0 ? `${h.dir}°` : "calm"}</td>)}</tr>
+        </tbody>
+      </table>
+    </section>
+  );
+}
+
+/* ------------------------------------------------------------------ impact (rubric: before/after vs baseline, measured vs estimated) */
+
+async function Impact() {
+  const [m, dm] = await Promise.all([aarMetrics(), delayMetrics()]);
+  const sel = dm?.models.find((x) => x.name === dm.selected_model);
+  const aar = m?.models.find((x) => x.name === m.selected_model);
+  const fewerFalse = sel && dm ? 1 - sel.confusion_matrix.fp / dm.baseline.confusion_matrix.fp : null;
+  const moreCaught = sel && dm ? sel.confusion_matrix.tp / dm.baseline.confusion_matrix.tp - 1 : null;
+  const lessError = aar && m ? 1 - aar.test_rmse.all / m.baseline.test_rmse.all : null;
+  return (
+    <section aria-labelledby="impact" className="rounded-md border border-[var(--line)] bg-[var(--panel)] p-4">
+      <h2 id="impact" className="mb-1 text-base font-semibold">Impact vs today&apos;s reference</h2>
+      <p className="mb-3 text-xs text-[var(--muted)]">
+        <b className="text-[var(--ink)]">Measured</b> on the test year (Jul 2024 – Jul 2025) against the historical baselines, which stand in for
+        planning from typical rates. Effects on full traffic volumes are <b className="text-[var(--ink)]">estimates</b>, not measured: the flight file is a ~1% sample.
+      </p>
+      <div className="mb-4 grid gap-3 sm:grid-cols-3">
+        <Stat label="Delay alerts: fewer false alarms" value={fewerFalse == null ? "–" : pct(fewerFalse)} />
+        <Stat label="Delay alerts: more severe flights caught" value={moreCaught == null ? "–" : `+${pct(moreCaught)}`} />
+        <Stat label="Arrivals per hour: lower forecast error" value={lessError == null ? "–" : pct(lessError)} />
+      </div>
+      <h3 className="mb-1 text-xs font-semibold">Adoption constraints</h3>
+      <ul className="list-disc space-y-0.5 pl-5 text-xs text-[var(--muted)]">
+        <li>Needs live schedule and weather feeds; this demo replays past data.</li>
+        <li>Trained on one year of a ~1% flight sample: retrain on full flight data before operational use.</li>
+        <li>Sees local weather and the schedule only: network knock-on delays, IT outages and ground stops are invisible (see Where it fails).</li>
+        <li>Runway headings are the brief&apos;s fixed assumption; real use needs the airport&apos;s active runway configuration.</li>
+        <li>The alert line balances precision and recall (max F1); a unit may prefer fewer false alarms or more catches and should set its own.</li>
+        <li>Advisory only: it supports the coordinator&apos;s existing rate and delay-program decisions, it does not make them.</li>
+      </ul>
+    </section>
   );
 }
