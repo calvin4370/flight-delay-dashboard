@@ -1,0 +1,279 @@
+{
+  "generated_utc": "2026-10-31T07:06:09Z",
+  "source": "pipeline/export_aar.py",
+  "split": {
+    "train": [
+      "2023-01-01",
+      "2023-12-31"
+    ],
+    "validation": [
+      "2024-01-01",
+      "2024-06-30"
+    ],
+    "test": [
+      "2024-07-01",
+      "2025-07-31"
+    ]
+  },
+  "selected_model": "lightgbm",
+  "selected_on": "validation",
+  "selection_note": "Selected among the tree models on validation RMSE (D20, D44): they use weather and give SHAP evidence (D27). SARIMAX is a schedule-only time-series comparison (D44); it scores lower RMSE because it uses the arrivals counted up to the issue time.",
+  "target": "AAR proxy: realised arrivals (wheels-on) per airport per UTC hour (D8)",
+  "test_rows": 75996,
+  "interval_80_by_horizon": {
+    "3": {
+      "low": -6.109355230608029,
+      "high": 9.13721882221295
+    },
+    "6": {
+      "low": -6.13558756912855,
+      "high": 8.973068359631721
+    },
+    "9": {
+      "low": -6.1297927354461,
+      "high": 9.067701193884417
+    },
+    "12": {
+      "low": -6.1382421913846645,
+      "high": 9.221483779779726
+    }
+  },
+  "models": [
+    {
+      "name": "random_forest",
+      "validation_rmse": 7.552,
+      "test_rmse": {
+        "all": 8.88,
+        "ATL": 7.244,
+        "DFW": 10.258,
+        "ATL h3": 7.205,
+        "ATL h6": 7.253,
+        "ATL h9": 7.253,
+        "ATL h12": 7.263,
+        "DFW h3": 10.225,
+        "DFW h6": 10.241,
+        "DFW h9": 10.26,
+        "DFW h12": 10.308
+      },
+      "test_mae": {
+        "all": 5.776,
+        "ATL": 4.71,
+        "DFW": 6.841,
+        "ATL h3": 4.686,
+        "ATL h6": 4.711,
+        "ATL h9": 4.717,
+        "ATL h12": 4.727,
+        "DFW h3": 6.822,
+        "DFW h6": 6.835,
+        "DFW h9": 6.846,
+        "DFW h12": 6.862
+      }
+    },
+    {
+      "name": "xgboost",
+      "validation_rmse": 7.453,
+      "test_rmse": {
+        "all": 8.91,
+        "ATL": 7.113,
+        "DFW": 10.402,
+        "ATL h3": 7.048,
+        "ATL h6": 7.12,
+        "ATL h9": 7.126,
+        "ATL h12": 7.16,
+        "DFW h3": 10.363,
+        "DFW h6": 10.377,
+        "DFW h9": 10.42,
+        "DFW h12": 10.446
+      },
+      "test_mae": {
+        "all": 5.928,
+        "ATL": 4.655,
+        "DFW": 7.201,
+        "ATL h3": 4.625,
+        "ATL h6": 4.64,
+        "ATL h9": 4.662,
+        "ATL h12": 4.692,
+        "DFW h3": 7.177,
+        "DFW h6": 7.188,
+        "DFW h9": 7.221,
+        "DFW h12": 7.217
+      }
+    },
+    {
+      "name": "lightgbm",
+      "validation_rmse": 7.296,
+      "test_rmse": {
+        "all": 8.743,
+        "ATL": 7.067,
+        "DFW": 10.146,
+        "ATL h3": 7.025,
+        "ATL h6": 7.079,
+        "ATL h9": 7.073,
+        "ATL h12": 7.089,
+        "DFW h3": 10.083,
+        "DFW h6": 10.115,
+        "DFW h9": 10.15,
+        "DFW h12": 10.237
+      },
+      "test_mae": {
+        "all": 5.713,
+        "ATL": 4.591,
+        "DFW": 6.835,
+        "ATL h3": 4.575,
+        "ATL h6": 4.587,
+        "ATL h9": 4.6,
+        "ATL h12": 4.602,
+        "DFW h3": 6.795,
+        "DFW h6": 6.81,
+        "DFW h9": 6.855,
+        "DFW h12": 6.878
+      }
+    },
+    {
+      "name": "sarimax",
+      "validation_rmse": 6.928,
+      "test_rmse": {
+        "all": 7.509,
+        "ATL": 6.608,
+        "DFW": 8.313,
+        "ATL h3": 6.609,
+        "ATL h6": 6.607,
+        "ATL h9": 6.608,
+        "ATL h12": 6.606,
+        "DFW h3": 8.318,
+        "DFW h6": 8.311,
+        "DFW h9": 8.311,
+        "DFW h12": 8.311
+      },
+      "test_mae": {
+        "all": 4.756,
+        "ATL": 4.226,
+        "DFW": 5.286,
+        "ATL h3": 4.227,
+        "ATL h6": 4.227,
+        "ATL h9": 4.226,
+        "ATL h12": 4.226,
+        "DFW h3": 5.286,
+        "DFW h6": 5.285,
+        "DFW h9": 5.285,
+        "DFW h12": 5.285
+      }
+    }
+  ],
+  "baseline": {
+    "name": "baseline",
+    "validation_rmse": 9.627,
+    "test_rmse": {
+      "all": 11.288,
+      "ATL": 9.328,
+      "DFW": 12.955,
+      "ATL h3": 9.328,
+      "ATL h6": 9.328,
+      "ATL h9": 9.328,
+      "ATL h12": 9.328,
+      "DFW h3": 12.955,
+      "DFW h6": 12.955,
+      "DFW h9": 12.955,
+      "DFW h12": 12.955
+    },
+    "test_mae": {
+      "all": 7.596,
+      "ATL": 6.327,
+      "DFW": 8.865,
+      "ATL h3": 6.327,
+      "ATL h6": 6.327,
+      "ATL h9": 6.327,
+      "ATL h12": 6.327,
+      "DFW h3": 8.865,
+      "DFW h6": 8.865,
+      "DFW h9": 8.865,
+      "DFW h12": 8.865
+    }
+  },
+  "best_params": {
+    "random_forest": {
+      "n_estimators": 390,
+      "max_depth": 13,
+      "min_samples_leaf": 16,
+      "max_features": 0.6702264438270331
+    },
+    "xgboost": {
+      "n_estimators": 864,
+      "learning_rate": 0.028724173258701143,
+      "max_depth": 4,
+      "subsample": 0.9383863295518323,
+      "colsample_bytree": 0.7097967982849942,
+      "min_child_weight": 17.93443107575228,
+      "reg_lambda": 0.004847699895535229
+    },
+    "lightgbm": {
+      "n_estimators": 900,
+      "learning_rate": 0.03463784486720818,
+      "num_leaves": 27,
+      "min_child_samples": 19,
+      "subsample": 0.7431618515897124,
+      "colsample_bytree": 0.8150074820705128,
+      "reg_lambda": 0.0013266434600055007
+    },
+    "sarimax": {
+      "order": [
+        1,
+        0,
+        2
+      ],
+      "seasonal_order": [
+        1,
+        0,
+        1,
+        24
+      ]
+    }
+  },
+  "failure_cases": [
+    {
+      "airport": "DFW",
+      "time_utc": "2024-12-16T23:00:00Z",
+      "what_happened": "0 arrivals landed against 65 scheduled",
+      "predicted": 69.2,
+      "actual": 0,
+      "reason": "Arrivals collapsed without a matching weather signal 3 h earlier (likely a ground stop, outage or data gap); the model only sees schedule and weather",
+      "how_user_knows": "Actual arrivals fall far below the forecast range in the first hour; the TMC's live traffic picture shows the gap before the model would"
+    },
+    {
+      "airport": "ATL",
+      "time_utc": "2024-07-19T11:00:00Z",
+      "what_happened": "11 arrivals landed against 70 scheduled",
+      "predicted": 72.0,
+      "actual": 11,
+      "reason": "Global CrowdStrike IT outage (19 Jul 2024) grounded many Delta flights; not visible in weather or schedule",
+      "how_user_knows": "Actual arrivals fall far below the forecast range in the first hour; the TMC's live traffic picture shows the gap before the model would"
+    },
+    {
+      "airport": "ATL",
+      "time_utc": "2025-01-10T13:00:00Z",
+      "what_happened": "16 arrivals landed against 82 scheduled",
+      "predicted": 76.2,
+      "actual": 16,
+      "reason": "Arrivals collapsed without a matching weather signal 3 h earlier (likely a ground stop, outage or data gap); the model only sees schedule and weather",
+      "how_user_knows": "Actual arrivals fall far below the forecast range in the first hour; the TMC's live traffic picture shows the gap before the model would"
+    },
+    {
+      "airport": "DFW",
+      "time_utc": "2025-07-13T00:00:00Z",
+      "what_happened": "0 arrivals landed against 81 scheduled",
+      "predicted": 60.0,
+      "actual": 0,
+      "reason": "Arrivals collapsed without a matching weather signal 3 h earlier (likely a ground stop, outage or data gap); the model only sees schedule and weather",
+      "how_user_knows": "Actual arrivals fall far below the forecast range in the first hour; the TMC's live traffic picture shows the gap before the model would"
+    },
+    {
+      "airport": "ATL",
+      "time_utc": "2025-06-28T01:00:00Z",
+      "what_happened": "12 arrivals landed against 88 scheduled",
+      "predicted": 72.0,
+      "actual": 12,
+      "reason": "Arrivals collapsed without a matching weather signal 3 h earlier (likely a ground stop, outage or data gap); the model only sees schedule and weather",
+      "how_user_knows": "Actual arrivals fall far below the forecast range in the first hour; the TMC's live traffic picture shows the gap before the model would"
+    }
+  ]
+}
