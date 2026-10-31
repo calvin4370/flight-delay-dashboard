@@ -153,7 +153,7 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [ ] Leakage check
 - [ ] Accept any airport code (IATA/ICAO) (D13)
 - [ ] Cite all data sources
-- [~] Hourly weather fetch for any airport code (D13) (Claude) — `scripts/fetch_weather.py` (Meteostat bulk, not committed) reproduces the provided ATL/DFW file 100%; to move into `pipeline/` (D15); airport database still waits on D39
+- [~] Hourly weather fetch for any airport code (D13) (YXY4NG + Claude) — moving to `pipeline/fetch_weather.py` (D15); reproduces the provided ATL/DFW file 100%; airport database waits on D39
 
 ### 2. Delay classifier (D16, D17) — Calvin (D41)
 - [~] Baseline (D22) (Calvin + Claude) — `pipeline/train_delay.py`
@@ -163,12 +163,12 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [~] Prediction explanations (D27) (Calvin + Claude)
 
 ### 3. AAR regressor (D5, D16, D18) — YXY4NG (D41)
-Status: code written and on `main`; **not run end to end yet**. BTS download in progress.
-- [~] BTS fetch (D7) (Claude) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
-- [~] AAR target and features (D8, D34) (Claude) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
-- [~] Baseline (D22) (Claude) — in `pipeline/train_aar.py`, training period only
-- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude) — `pipeline/train_aar.py`; all models learn from 2023 only
-- [~] Report RMSE vs baseline (Claude) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
+Status: BTS fetch and build done (14:40); training running (started 14:45).
+- [x] BTS fetch (D7) (YXY4NG + Claude) — `pipeline/fetch_bts.py`; 31 monthly files, 3,255,141 flights touching ATL/DFW
+- [x] AAR target and features (D8, D34, D42) (YXY4NG + Claude) — `pipeline/build_aar.py`; 45,264 airport-hours (ATL mean 37.5 arrivals/h, DFW 33.7): wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
+- [~] Baseline (D22) (YXY4NG + Claude) — in `pipeline/train_aar.py`, training period only
+- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (YXY4NG + Claude) — `pipeline/train_aar.py`; all models learn from 2023 only
+- [~] Report RMSE vs baseline (YXY4NG + Claude) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
 - [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
 - [x] Merge branch `AAR` into `main` (`16a46cd`, before the first run); branch deleted
 - [ ] Review notes from Calvin's Claude (YXY4NG to decide):
