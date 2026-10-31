@@ -1,7 +1,8 @@
 import Link from "next/link";
 import {
-  aarForecast, aarIndex, aarMetrics, delayFailureCases, delayFlights, delayMetrics, delayTrends, HORIZONS,
-  type AarHour, type FailureCase, type Factor, type RateRow,
+  aarForecast, aarIndex, aarMetrics, delayFailureCases, delayIndex, delayMetrics, delayTrends, HORIZONS,
+  type AarHour, type DelayMetrics, type DelayModel, type DelayScores, type DelayTrends, type FailureCase, type Factor,
+  type RateRow, type TrendCell,
 } from "@/lib/data";
 import { aarRules, delayRules, RULE_TEXT, RULES_STATUS, type Recommendation } from "@/lib/rules";
 import Briefing from "./briefing";
@@ -87,11 +88,7 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
       {view === "trends" && <Trends rates={index?.rates ?? null} />}
       {view === "performance" && <Performance />}
 
-      <footer className="mt-8 border-t border-neutral-300 pt-3 text-xs text-neutral-500 dark:border-neutral-700">
-        Assumptions: AAR proxy = realised wheels-on arrivals per hour (BTS), not the FAA declared rate · runway headings ATL 80°, DFW 180° (brief) ·
-        weather observations only, no forecasts · cancelled/diverted flights are not arrivals · flights in the repeated autumn DST hour are dropped (D43).
-        Data: BTS On-Time Reporting; Meteostat hourly (NOAA ISD), stations 72219 / 72259.
-      </footer>
+      <Assumptions />
     </main>
   );
 }
@@ -100,18 +97,23 @@ function Missing({ what }: { what: string }) {
   return <p className="rounded border border-dashed p-3 text-neutral-500">Not available yet: {what} has not been exported. Nothing is shown in its place.</p>;
 }
 
-function Factors({ factors }: { factors: Factor[] }) {
+// unit "arrivals": SHAP in arrivals per hour, fewer is worse. unit "pp": SHAP in risk percentage points, more is worse.
+function Factors({ factors, unit = "arrivals" }: { factors: Factor[]; unit?: "arrivals" | "pp" }) {
   return (
     <ul className="space-y-0.5">
-      {factors.map((f) => (
+      {factors.map((f) => {
+        const v = (f.shap ?? 0) * (unit === "pp" ? 100 : 1);
+        const bad = unit === "pp" ? v > 0 : v < 0;
+        return (
         <li key={f.feature} className="text-xs">
-          <span className={(f.shap ?? 0) < 0 ? "text-red-600" : "text-emerald-700 dark:text-emerald-400"}>
-            {(f.shap ?? 0) > 0 ? "+" : ""}{f.shap?.toFixed(1)}
+          <span className={bad ? "text-red-700 dark:text-red-400" : "text-emerald-700 dark:text-emerald-400"}>
+            {v > 0 ? "+" : ""}{v.toFixed(1)}{unit === "pp" ? " pp" : ""}
           </span>{" "}
           {f.label} = {String(f.value ?? "n/a")}
           {f.observed_utc && <span className="text-neutral-500"> · obs {f.observed_utc.slice(0, 16).replace("T", " ")}Z</span>}
         </li>
-      ))}
+        );
+      })}
     </ul>
   );
 }
@@ -139,8 +141,8 @@ function Recs({ recs }: { recs: Recommendation[] }) {
 }
 
 async function RiskBoard({ day, airport, date, horizon }: { day: AarHour[]; airport: string; date: string; horizon: number }) {
-  const df = await delayFlights();
-  const flights = (df?.flights ?? []).filter((f) => f.airport === airport && f.horizon_h === horizon && f.sched_local.startsWith(date));
+  const di = await delayIndex();
+  const flights = di?.day.get(`${airport}|${horizon}|${date}`) ?? [];
   const recs = [...day.flatMap(aarRules), ...delayRules(flights)];
   const order = { high: 0, medium: 1, info: 2 };
   recs.sort((a, b) => order[a.severity] - order[b.severity]);
@@ -173,21 +175,30 @@ async function RiskBoard({ day, airport, date, horizon }: { day: AarHour[]; airp
           </table>
         )}
         <h2 className="mb-2 mt-6 font-semibold">Flights at severe-delay risk (&gt; 45 min), {horizon} h ahead</h2>
-        {!df ? <Missing what="data/outputs/delay_flights.json" /> : flights.length === 0 ? <p>No flights in the sample for this day.</p> : (
+        {di && (
+          <p className="mb-2 text-xs text-neutral-600 dark:text-neutral-400">
+            Model {di.model} · alert when risk ≥ {(di.threshold * 100).toFixed(1)}% (max F1 on validation, D21) · typical = historical
+            severe rate for the same airport, direction, hour and month (D22). Factors: effect on risk in percentage points.
+          </p>
+        )}
+        {!di ? <Missing what="data/outputs/delay_flights.json" /> : flights.length === 0 ? <p>No sampled flights at this airport on this day.</p> : (
           <table className="w-full border-collapse tabular-nums">
             <thead className="text-left text-xs text-neutral-500">
-              <tr><th>Sched local</th><th>Flight</th><th>Route</th><th>Risk</th><th>Alert</th><th>Actual</th><th>Why</th></tr>
+              <tr><th>Sched local</th><th>Flight</th><th>Route</th><th>Risk vs alert line</th><th>Typical</th><th>Actual</th><th>Why (top factors)</th></tr>
             </thead>
             <tbody>
-              {[...flights].sort((a, b) => b.risk - a.risk).map((f) => (
+              {flights.map((f) => (
                 <tr key={f.flight_id + f.horizon_h} className="border-t border-neutral-200 align-top dark:border-neutral-800">
                   <td className="py-1 font-mono">{f.sched_local.slice(11, 16)}</td>
                   <td>{f.carrier}{f.flight_number}</td>
                   <td>{f.origin}→{f.dest}</td>
-                  <td>{(f.risk * 100).toFixed(0)}%</td>
-                  <td>{f.alert && <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">Alert</span>}</td>
-                  <td>{f.actual_severe == null ? "n/a" : f.actual_severe ? "severe" : "ok"}</td>
-                  <td><Factors factors={f.top_factors ?? []} /></td>
+                  <td>
+                    <RiskBar risk={f.risk} threshold={di.threshold} />
+                    {f.alert && <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">Alert</span>}
+                  </td>
+                  <td>{f.baseline_rate == null ? "n/a" : `${(f.baseline_rate * 100).toFixed(0)}%`}</td>
+                  <td>{f.actual_severe == null ? "n/a" : f.actual_severe ? "severe" : "under 45 min"}</td>
+                  <td><Factors factors={f.top_factors ?? []} unit="pp" /></td>
                 </tr>
               ))}
             </tbody>
@@ -252,7 +263,7 @@ async function Trends({ rates }: { rates: { month: RateRow[]; hour: RateRow[] } 
       ))}
       <section className="lg:col-span-2">
         <h2 className="mb-2 font-semibold">Severe-delay rate (share of flights &gt; 45 min late)</h2>
-        {!trends ? <Missing what="data/outputs/delay_trends.json" /> : <GenericTables data={trends} />}
+        {!trends ? <Missing what="data/outputs/delay_trends.json" /> : <DelayTrendCharts trends={trends} />}
       </section>
     </div>
   );
@@ -270,33 +281,6 @@ function RateBars({ rows }: { rows: RateRow[] }) {
       ))}
     </ul>
   );
-}
-
-function GenericTables({ data }: { data: unknown }) {
-  // delay_* files are Calvin's (D41); render whatever tables they contain without reshaping numbers.
-  if (Array.isArray(data)) {
-    const cols = [...new Set(data.flatMap((r) => (r && typeof r === "object" ? Object.keys(r) : [])))];
-    return (
-      <table className="mb-4 w-full border-collapse text-xs tabular-nums">
-        <thead className="text-left text-neutral-500"><tr>{cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
-        <tbody>{data.slice(0, 200).map((r, i) => (
-          <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800">
-            {cols.map((c) => { const v = (r as Record<string, unknown>)[c]; return <td key={c}>{typeof v === "number" ? (Math.abs(v) < 1 && v !== 0 ? v.toFixed(3) : String(v)) : typeof v === "object" ? JSON.stringify(v) : String(v ?? "")}</td>; })}
-          </tr>))}
-        </tbody>
-      </table>
-    );
-  }
-  if (data && typeof data === "object") {
-    return (
-      <div>{Object.entries(data as Record<string, unknown>).filter(([k]) => !["generated_utc", "source", "split"].includes(k)).map(([k, v]) => (
-        <div key={k} className="mb-2"><h3 className="text-xs font-semibold">{k}</h3>
-          {v && typeof v === "object" ? <GenericTables data={v} /> : <p className="text-xs">{String(v)}</p>}
-        </div>))}
-      </div>
-    );
-  }
-  return <p className="text-xs">{String(data)}</p>;
 }
 
 function Failures({ cases }: { cases: FailureCase[] }) {
@@ -346,13 +330,148 @@ async function Performance() {
       </section>
       <section>
         <h2 className="mb-1 font-semibold">Delay classifier (&gt; 45 min): precision, recall, confusion matrix</h2>
-        {!dm ? <Missing what="data/outputs/delay_metrics.json" /> : <GenericTables data={dm} />}
-        {dfc && <><h3 className="mb-2 mt-4 font-semibold">Delay failure cases</h3><Failures cases={dfc} /></>}
+        {!dm ? <Missing what="data/outputs/delay_metrics.json" /> : <DelayPerformance m={dm} />}
+        {(dfc ?? dm?.failure_cases) && <><h3 className="mb-2 mt-4 font-semibold">Delay failure cases</h3><Failures cases={(dfc ?? dm?.failure_cases)!} /></>}
       </section>
       <section className="text-xs text-neutral-500">
         <h3 className="font-semibold">Recommendation rules ({RULES_STATUS})</h3>
         <ul>{RULE_TEXT.map((t) => <li key={t}>· {t}</li>)}</ul>
       </section>
+    </div>
+  );
+}
+
+const pct = (x: number | undefined, d = 1) => (x == null ? "n/a" : `${(x * 100).toFixed(d)}%`);
+
+function RiskBar({ risk, threshold }: { risk: number; threshold: number }) {
+  // Risk on a 0-50% track with the alert line marked: how far above or below the line a flight sits.
+  const scale = (x: number) => `${Math.min(100, (x / 0.5) * 100)}%`;
+  return (
+    <span className="inline-flex items-center gap-1.5 align-middle">
+      <span className="relative inline-block h-2 w-20 rounded-sm bg-neutral-200 dark:bg-neutral-800">
+        <span className={`absolute inset-y-0 left-0 rounded-sm ${risk >= threshold ? "bg-red-600" : "bg-neutral-500"}`} style={{ width: scale(risk) }} />
+        <span className="absolute -inset-y-0.5 w-px bg-neutral-900 dark:bg-white" style={{ left: scale(threshold) }} title="alert threshold" />
+      </span>
+      <span>{pct(risk, 0)}</span>
+    </span>
+  );
+}
+
+function Assumptions() {
+  // Mirrors PLAN.md "Assumptions to state in the demo".
+  const items = [
+    "Runway headings ATL 80°, DFW 180° (brief); other airports: most common runway direction from OurAirports.",
+    "Flights in the repeated autumn daylight-saving hour are dropped (D43).",
+    "AAR proxy = realised arrival throughput from BTS (wheels-on per hour), not the FAA's declared rate (D8); cancelled and diverted flights are not arrivals.",
+    "AAR features use scheduled arrivals for the target hour, known in advance from the published schedule (D34).",
+    "Weather observations only, no forecasts (D13); every input is at least 3 h older than the scheduled time (D4).",
+    "Test period Jul 2024 – Jul 2025 (D11), models trained on 2023 only. Advisory tool: the Traffic Management Coordinator makes every decision.",
+  ];
+  return (
+    <section className="mt-8 border-t border-neutral-300 pt-3 text-xs text-neutral-600 dark:border-neutral-700 dark:text-neutral-400">
+      <h2 className="mb-1 font-semibold text-neutral-900 dark:text-neutral-100">Assumptions</h2>
+      <ul className="grid gap-x-6 gap-y-0.5 md:grid-cols-2">{items.map((t) => <li key={t}>· {t}</li>)}</ul>
+      <p className="mt-2">Data: BTS On-Time Reporting (US DOT); Meteostat hourly observations (NOAA ISD), stations 72219 ATL / 72259 DFW; OurAirports.</p>
+    </section>
+  );
+}
+
+function DelayTrendCharts({ trends }: { trends: DelayTrends }) {
+  const dims = [
+    ["month", "Month"], ["local_hour", "Scheduled local hour"], ["weather_group", "Weather in the scheduled hour"],
+  ] as const;
+  const groups = [...new Set(trends.severe_rate.month.map((c) => `${c.airport} ${c.direction}`))].sort();
+  return (
+    <div>
+      <p className="mb-3 text-xs text-neutral-600 dark:text-neutral-400">{trends.note}. Period {trends.period.join(" – ")}.</p>
+      {dims.map(([dim, title]) => {
+        const cells = trends.severe_rate[dim];
+        const max = Math.max(...cells.map((c) => c.rate), 0.01);
+        return (
+          <div key={dim} className="mb-5">
+            <h3 className="mb-1 text-xs font-semibold">{title}</h3>
+            <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+              {groups.map((g) => (
+                <div key={g}>
+                  <p className="mb-1 text-xs font-medium">{g}</p>
+                  <ul className="space-y-px text-[11px] tabular-nums">
+                    {cells.filter((c: TrendCell) => `${c.airport} ${c.direction}` === g).map((c: TrendCell) => (
+                      <li key={String(c[dim])} className="flex items-center gap-1.5" title={`${c.n} flights`}>
+                        <span className="w-14 truncate text-neutral-500">{String(c[dim])}</span>
+                        <span className={`h-2.5 ${c.n < 30 ? "bg-neutral-300 dark:bg-neutral-700" : "bg-sky-700"}`} style={{ width: `${(c.rate / max) * 90}px` }} />
+                        <span>{pct(c.rate)}</span>
+                        <span className="text-neutral-500">n={c.n}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </div>
+        );
+      })}
+      <p className="text-xs text-neutral-500">Light bars: fewer than 30 flights; treat as unreliable.</p>
+    </div>
+  );
+}
+
+function ScoreRow({ name, s, bold }: { name: string; s: DelayScores; bold?: boolean }) {
+  return (
+    <tr className={`border-t border-neutral-200 dark:border-neutral-800 ${bold ? "font-semibold" : ""}`}>
+      <td>{name}</td>
+      <td>{s.pr_auc?.toFixed(3) ?? "n/a"}</td>
+      <td>{pct(s.precision)}</td>
+      <td>{pct(s.recall)}</td>
+      <td>{s.f1?.toFixed(3) ?? "n/a"}</td>
+      <td>{pct(s.accuracy)}</td>
+      <td>{s.confusion_matrix ? `${s.confusion_matrix.tp} / ${s.confusion_matrix.fp} / ${s.confusion_matrix.fn} / ${s.confusion_matrix.tn}` : "n/a"}</td>
+      <td>{s.positives ?? "n/a"} / {s.rows ?? "n/a"}</td>
+    </tr>
+  );
+}
+
+function DelayPerformance({ m }: { m: DelayMetrics }) {
+  const sel = m.models.find((x) => x.name === m.selected_model) as DelayModel | undefined;
+  const head = (
+    <tr><th>Model</th><th>PR-AUC</th><th>Precision</th><th>Recall</th><th>F1</th><th>Accuracy</th><th>TP / FP / FN / TN</th><th>Severe / flights</th></tr>
+  );
+  const shap = Object.entries(m.mean_abs_shap_top15 ?? {}).slice(0, 8);
+  return (
+    <div className="space-y-4">
+      <p className="text-xs text-neutral-600 dark:text-neutral-400">
+        {m.target}. Selected <b>{m.selected_model}</b> on {m.selected_on}; alert threshold {pct(m.threshold)} ({m.threshold_rule}).
+        Test {m.split.test.join(" – ")}. About 1 in 9 flights is severe, so accuracy alone misleads: read precision and recall.
+      </p>
+      <table className="w-full border-collapse text-xs tabular-nums">
+        <thead className="text-left text-neutral-500">{head}</thead>
+        <tbody>
+          <ScoreRow name={`baseline (${m.baseline.name})`} s={m.baseline} />
+          {m.models.map((x) => <ScoreRow key={x.name} name={x.name} s={x} bold={x.name === m.selected_model} />)}
+        </tbody>
+      </table>
+      {sel?.by_airport_direction && (
+        <>
+          <h3 className="text-xs font-semibold">{sel.name} by airport and direction (test)</h3>
+          <table className="w-full border-collapse text-xs tabular-nums">
+            <thead className="text-left text-neutral-500">{head}</thead>
+            <tbody>{Object.entries(sel.by_airport_direction).map(([k, v]) => <ScoreRow key={k} name={k} s={v} />)}</tbody>
+          </table>
+        </>
+      )}
+      {sel?.by_horizon && (
+        <>
+          <h3 className="text-xs font-semibold">{sel.name} by hours ahead (test)</h3>
+          <table className="w-full border-collapse text-xs tabular-nums">
+            <thead className="text-left text-neutral-500">{head}</thead>
+            <tbody>{Object.entries(sel.by_horizon).map(([k, v]) => <ScoreRow key={k} name={`${k} h`} s={v} />)}</tbody>
+          </table>
+        </>
+      )}
+      {shap.length > 0 && (
+        <p className="text-xs text-neutral-600 dark:text-neutral-400">
+          Strongest inputs on average (mean |SHAP|, risk points): {shap.map(([k, v]) => `${k} ${(v * 100).toFixed(1)}`).join(" · ")}
+        </p>
+      )}
     </div>
   );
 }

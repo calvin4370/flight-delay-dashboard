@@ -78,12 +78,30 @@ export type DelayFlight = {
   top_factors: Factor[];
 };
 
-// Delay files are owned by Calvin (D41); the app treats any field as optional and shows what is present.
-export type DelayMetrics = Record<string, unknown> & { threshold?: number; selected_model?: string };
-export type DelayTrends = Record<string, unknown>;
+// Delay files are owned by Calvin (D41); shapes from his D35 export (pipeline/export_delay.py).
+export type Confusion = { tn: number; fp: number; fn: number; tp: number };
+export type DelayScores = {
+  pr_auc: number; precision: number; recall: number; accuracy: number; f1: number;
+  confusion_matrix: Confusion; positives: number; rows: number;
+};
+export type DelayModel = DelayScores & {
+  name: string; validation_pr_auc?: number; threshold?: number;
+  by_airport_direction?: Record<string, DelayScores>; by_horizon?: Record<string, DelayScores>;
+};
+export type DelayMetrics = {
+  generated_utc: string; split: Record<string, [string, string]>; target: string;
+  selected_model: string; selected_on: string; threshold: number; threshold_rule: string;
+  models: DelayModel[]; baseline: DelayModel; mean_abs_shap_top15?: Record<string, number>;
+  failure_cases?: FailureCase[];
+};
+export type TrendCell = { airport: string; direction: string; rate: number; n: number } & Record<string, string | number>;
+export type DelayTrends = {
+  period: [string, string]; note: string;
+  severe_rate: { month: TrendCell[]; local_hour: TrendCell[]; weather_group: TrendCell[] };
+};
 
 type AarFile = { selected_model: string; generated_utc: string; hours: AarHour[] };
-type DelayFile = { flights: DelayFlight[]; threshold?: number; generated_utc?: string };
+type DelayFile = { flights: DelayFlight[]; threshold: number; selected_model?: string; generated_utc?: string };
 
 // Files are static between pipeline runs, so each is read and parsed once per server process. The promise is
 // cached (not the value) so concurrent first requests share one parse of the 46 MB forecast.
@@ -156,3 +174,21 @@ export function aarIndex(): Promise<AarIndex | null> {
 }
 
 export const HORIZONS = [3, 6, 9, 12] as const;
+
+let delayIndexPromise: Promise<{ threshold: number; model?: string; day: Map<string, DelayFlight[]> } | null> | undefined;
+
+// Same idea for the 27.7 MB delay file: one pass, then O(1) lookups per airport / horizon / local date.
+export function delayIndex() {
+  delayIndexPromise ??= delayFlights().then((f) => {
+    if (!f) return null;
+    const day = new Map<string, DelayFlight[]>();
+    for (const fl of f.flights) {
+      const k = `${fl.airport}|${fl.horizon_h}|${fl.sched_local.slice(0, 10)}`;
+      const list = day.get(k);
+      if (list) list.push(fl); else day.set(k, [fl]);
+    }
+    for (const list of day.values()) list.sort((a, b) => b.risk - a.risk);
+    return { threshold: f.threshold, model: f.selected_model, day };
+  });
+  return delayIndexPromise;
+}

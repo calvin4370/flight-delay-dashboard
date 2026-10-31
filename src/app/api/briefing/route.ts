@@ -1,4 +1,4 @@
-import { aarForecast, delayFlights } from "@/lib/data";
+import { aarIndex, delayIndex } from "@/lib/data";
 import { aarRules, delayRules } from "@/lib/rules";
 
 // D14: Claude writes a TMC shift briefing from model outputs only. It never invents numbers and says when data is missing.
@@ -14,9 +14,9 @@ Rules you must follow:
 
 export async function POST(request: Request) {
   const { airport, date, horizon } = (await request.json()) as { airport: string; date: string; horizon: number };
-  const [forecast, df] = await Promise.all([aarForecast(), delayFlights()]);
-  const hours = (forecast?.hours ?? []).filter((h) => h.airport === airport && h.horizon_h === horizon && h.time_local.startsWith(date));
-  const flights = df ? df.flights.filter((f) => f.airport === airport && f.horizon_h === horizon && f.sched_local.startsWith(date)) : null;
+  const [index, di] = await Promise.all([aarIndex(), delayIndex()]);
+  const hours = index?.day.get(`${airport}|${horizon}|${date}`) ?? [];
+  const flights = di ? (di.day.get(`${airport}|${horizon}|${date}`) ?? []) : null;
   const facts = {
     airport, local_date: date, hours_ahead: horizon,
     arrival_forecast: hours.length === 0 ? null : hours.map((h) => ({
