@@ -1,8 +1,8 @@
 import type { AarHour, DelayFlight } from "./data";
 
 // D26: recommendations are fixed rules on model outputs; each shows the rule that fired and its inputs.
-// D36: these rules and thresholds are a PROPOSAL (Claude draft per D37) until a team member approves them.
-export const RULES_STATUS = "Proposed (D36), pending team approval";
+// D36: rules and thresholds approved by the team (4af7334).
+export const RULES_STATUS = "Approved rules (D36)";
 
 export type Recommendation = {
   rule: string;
