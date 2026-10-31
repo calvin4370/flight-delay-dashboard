@@ -101,7 +101,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 
 | # | Question |
 |---|---|
-| D36 | The specific recommendation rules and their thresholds (D26); Claude drafts per D37 |
+| D36 | Recommendation rules (D26), **proposal** in `src/lib/rules.ts` and shown in the app as pending: R1 forecast < 85% of scheduled arrivals and ≥ 5 short → review the arrival rate (high if the whole 80% range is below schedule); R2 a weather window factor lowers the forecast → brief it with its observation time; R3 ≥ 3 flights in one local hour above the delay threshold (D21) → notify airlines / Command Center; R4 80% range wider than 60% of the forecast → low confidence, check live traffic. Needs a team member to approve |
 
 ### D35 output JSON contract (approved, see D35 above)
 
@@ -183,7 +183,7 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [ ] Leakage check
 - [ ] Accept any airport code (IATA/ICAO) (D13)
 - [ ] Cite all data sources
-- [~] Hourly weather fetch for any airport code (D13) (YXY4NG + Claude) — moving to `pipeline/fetch_weather.py` (D15); reproduces the provided ATL/DFW file 100%; airport database waits on D39
+- [~] Hourly weather fetch for any airport code (D13) (YXY4NG + Claude) — `pipeline/fetch_weather.py` (`2b5d9fa`), reproduces the provided ATL/DFW file 100%; airport lookup per D39 option A still to wire in
 
 ### 2. Delay classifier (D16, D17) — Calvin (D41)
 - [x] Baseline (D22) (Calvin + Claude) — `pipeline/train_delay.py`; test PR-AUC 0.157
@@ -194,13 +194,13 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [x] Feature study on validation (Calvin + Claude) — `pipeline/feature_study_delay.py`: weather adds +16–18% PR-AUC; route / holiday / 3 h trend don't help consistently; features unchanged
 
 ### 3. AAR regressor (D5, D16, D18) — YXY4NG (D41)
-Status: BTS fetch and build done (14:40); training running (started 14:45).
+Status: done end to end (15:06). Test RMSE (arrivals/h): baseline 11.29 · RF 8.88 · XGBoost 8.91 · **LightGBM 8.74** (selected on validation) · SARIMAX 7.51 (schedule-only comparison, D44).
 - [x] BTS fetch (D7) (YXY4NG + Claude) — `pipeline/fetch_bts.py`; 31 monthly files, 3,255,141 flights touching ATL/DFW
 - [x] AAR target and features (D8, D34, D42) (YXY4NG + Claude) — `pipeline/build_aar.py`; 45,264 airport-hours (ATL mean 37.5 arrivals/h, DFW 33.7): wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
-- [~] Baseline (D22) (YXY4NG + Claude) — in `pipeline/train_aar.py`, training period only
-- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (YXY4NG + Claude) — `pipeline/train_aar.py`; all models learn from 2023 only
-- [~] Report RMSE vs baseline (YXY4NG + Claude) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
-- [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
+- [x] Baseline (D22) (YXY4NG + Claude) — in `pipeline/train_aar.py`, training period only
+- [x] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (YXY4NG + Claude) — `pipeline/train_aar.py`; all models learn from 2023 only; selection on validation (D44)
+- [x] Report RMSE vs baseline (YXY4NG + Claude) — `data/outputs/aar_metrics.json` (overall, per airport, per horizon)
+- [x] AAR failure case and limits (D28) (YXY4NG + Claude) — 5 cases in `aar_metrics.json`; e.g. ATL 19 Jul 2024 07:00–08:00 local (CrowdStrike outage): forecast ~72–82, actual 11–23
 - [x] Merge branch `AAR` into `main` (`16a46cd`, before the first run); branch deleted
 - [x] Review notes from Calvin's Claude — decided in D44; validation-based selection done in `3dd46f7`:
   - `train_aar.py` line 249 picks the best model by **test** RMSE; D20 tunes on validation, so selecting on validation keeps the test score unseen
@@ -208,17 +208,17 @@ Status: BTS fetch and build done (14:40); training running (started 14:45).
   - D23 row: "approved by a team member in chat" — which team member?
 
 ### 4. Pipeline → app contract — YXY4NG (D41)
-- [~] Define contract (D24, D35) (YXY4NG + Claude) — D35 proposal drafted above, waiting for approval
-- [ ] Export predictions
+- [x] Define contract (D24, D35) (YXY4NG + Claude) — approved in D35
+- [~] Export predictions — AAR done (`pipeline/export_aar.py` → `aar_forecast.json`, `aar_metrics.json`); delay files: Calvin
 
 ### 5. App (Next.js) — YXY4NG (D41)
-- [ ] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance
-- [ ] Recommendations (D26, D36)
-- [ ] Explanations / traceability in the UI (D27)
-- [ ] Uncertainty visible; the user makes the final call
+- [x] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance (YXY4NG + Claude, `61566aa`); delay sections fill in when `delay_flights/metrics/trends.json` are exported
+- [~] Recommendations (D26, D36) (YXY4NG + Claude) — rules R1–R4 built and shown as pending; waiting for D36 approval
+- [x] Explanations / traceability in the UI (D27) (YXY4NG + Claude) — top-3 SHAP factors with observation timestamps per hour/flight
+- [x] Uncertainty visible; the user makes the final call (YXY4NG + Claude) — 80% range per hour; recommendations labelled advisory
 
 ### 6. Claude in the app — YXY4NG (D41)
-- [ ] TMC briefing (D14)
+- [~] TMC briefing (D14) (YXY4NG + Claude) — `/api/briefing`: facts-only prompt, facts shown next to the text; needs `ANTHROPIC_API_KEY` on the server
 
 ### 7. Evaluation — each owner writes their model's results; Calvin assembles (D41)
 - [ ] Results: baselines vs models (delays and AAR)
