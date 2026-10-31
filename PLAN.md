@@ -77,7 +77,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D20 | Hyperparameter tuning with Optuna; tune delays on PR-AUC, AAR on RMSE | Calvin |
 | D21 | Delay alert threshold: maximise F1 on the validation period; report precision, recall, accuracy and confusion matrix at that threshold | Calvin |
 | D22 | Baselines, computed from the training period only: delays = historical severe rate for the same airport, direction, hour and month; AAR = historical average arrivals for the same airport, hour, day of week and month | Calvin |
-| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap | Calvin |
+| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap; **xgboost** (needed by D17/D18) | Calvin; xgboost approved by a team member in chat |
 | D24 | Contract: pipeline writes JSON to `data/outputs/` (flight risks, hourly AAR forecasts, metrics, trends); the Next.js app reads it directly | Calvin |
 | D25 | App views: Risk board (flights/hours with risk at 3/6/9/12 h + evidence), AAR forecast (vs baseline, next 3–12 h), Historical trends (rates, not minutes), Model performance (precision/recall/confusion matrix, RMSE vs baselines, failure case) | Calvin |
 | D26 | Recommendations: fixed rules on model outputs (each shows the rule that fired); Claude only words them in the briefing | Calvin |
@@ -104,16 +104,21 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [ ] Runway headings ATL 80°, DFW 180° (brief)
 - [ ] AAR proxy = realised arrival throughput from BTS, not the FAA's declared rate (D8)
 - [ ] Weather observations only, no forecasts (D13)
+- [ ] AAR proxy counts only flights that landed: cancelled and diverted flights are not arrivals (D8)
+- [ ] AAR features use scheduled arrivals for the target hour, known in advance from the published schedule (D34)
+- [ ] Arrivals in the repeated autumn daylight-saving hour are dropped (ambiguous local time; a few flights a year)
 
 ---
 
 ## Workstreams
 
 ### 0. Setup and coordination
+- Branches: `main` holds the plan and finished work; `AAR` holds the AAR regressor (WS3) until results are in. Plan updates go to `main` so everyone sees them.
 - [x] Next.js app scaffolded; uv Python project; EDA notebook complete
 - [ ] Settle Open decisions above
 - [ ] Teammate set up: repo, `npm install`, `uv sync`
-- [ ] Add approved packages (D23)
+- [x] Add approved packages (D23) (Claude, branch `AAR`, `448d61e`) — lightgbm, optuna, statsmodels, scikit-learn, xgboost; shap still to add
+- [x] Ignore large generated data: `data/raw/bts/`, `data/processed/`, `data/models/` in `.gitignore` (Claude, branch `AAR`)
 
 ### 1. Data pipeline
 - [ ] Load provided data (D30) and fetch external data by script (D7, D13)
@@ -123,6 +128,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [ ] Leakage check
 - [ ] Accept any airport code (IATA/ICAO) (D13)
 - [ ] Cite all data sources
+- [~] Hourly weather fetch for any airport code (D13) (Claude) — `scripts/fetch_weather.py` (Meteostat bulk, not committed) reproduces the provided ATL/DFW file 100%; to move into `pipeline/` (D15); airport database still waits on D39
 
 ### 2. Delay classifier (D16, D17)
 - [ ] Baseline (D22)
@@ -132,10 +138,14 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [ ] Prediction explanations (D27)
 
 ### 3. AAR regressor (D5, D16, D18)
-- [ ] BTS fetch and AAR target (D7, D8)
-- [ ] Baseline (D22)
-- [ ] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11)
-- [ ] Report RMSE vs baseline
+Status: code written and pushed (`448d61e`, branch `AAR`); **not run end to end yet**. BTS download in progress.
+- [~] BTS fetch (D7) (Claude, branch `AAR`) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
+- [~] AAR target and features (D8, D34) (Claude, branch `AAR`) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
+- [~] Baseline (D22) (Claude, branch `AAR`) — in `pipeline/train_aar.py`, training period only
+- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude, branch `AAR`) — `pipeline/train_aar.py`; all models learn from 2023 only
+- [~] Report RMSE vs baseline (Claude, branch `AAR`) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
+- [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
+- [ ] Merge branch `AAR` into `main` once results are in (a team member)
 
 ### 4. Pipeline → app contract
 - [ ] Define contract (D24, D35)
