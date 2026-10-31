@@ -124,7 +124,8 @@ def train_trees(data: dict, trials: int, seconds: int) -> dict:
                     data["x_train"], data["y_train"])
         joblib.dump(model, MODELS / f"aar_{name}.joblib")
         results[name] = {"model": model, "predict": predict, "best_params": study.best_params,
-                         "validation_rmse": study.best_value, "trials": len(study.trials)}
+                         "validation_rmse": study.best_value, "trials": len(study.trials),
+                         "validation_pred": predict(model, data["x_val"])}
     return results
 
 
@@ -165,7 +166,7 @@ def train_sarimax(hourly: pd.DataFrame, trials: int, seconds: int) -> dict:
         errs = []
         for g in per_airport.values():
             preds, _ = sarimax_forecasts(g, order, seasonal, SPLITS["train"][1])
-            val = (g["split"] == "validation").to_numpy()
+            val = g["split"].eq("validation").fillna(False).to_numpy(dtype=bool)  # hours before 2023 have no split
             for p in preds.values():
                 errs.append((g.loc[val, TARGET].to_numpy() - p[val]) ** 2)
         return float(np.sqrt(np.mean(np.concatenate(errs))))
@@ -246,8 +247,15 @@ def main() -> None:
                 k = f"{key[0]} h{key[1]}"
             metrics["test_rmse"][k] = {m: rmse(g[TARGET], g[m]) for m in models}
             metrics["test_mae"][k] = {m: float(np.mean(np.abs(g[TARGET] - g[m]))) for m in models}
-    best = min(trees, key=lambda m: metrics["test_rmse"]["all"][m])
+    # Model selection on validation RMSE (D20); the test score stays unseen until here.
+    best = min(trees, key=lambda m: trees[m]["validation_rmse"])
     metrics["best_model"] = best
+    metrics["selected_on"] = "validation"
+    # 80% range per horizon from the selected model's validation errors (actual - predicted).
+    val_err = parts["validation"][TARGET].to_numpy() - trees[best]["validation_pred"]
+    by_h = pd.Series(val_err).groupby(parts["validation"]["horizon_h"].to_numpy())
+    metrics["interval_80_by_horizon"] = {int(h): {"low": float(e.quantile(0.1)), "high": float(e.quantile(0.9))}
+                                         for h, e in by_h}
     metrics["runtime_minutes"] = round((time.time() - started) / 60, 1)
 
     # Largest errors of the best model at the 3 h horizon: candidates for the failure case (D28).
