@@ -51,11 +51,13 @@ uv sync
 uv run python pipeline/build_delay.py
 uv run python pipeline/train_delay.py
 uv run python pipeline/export_delay.py
+uv run python pipeline/feature_study_delay.py   # optional: feature tests on validation
 
 # AAR regressor (downloads full BTS data, ~0.9 GB)
 uv run python pipeline/fetch_bts.py
 uv run python pipeline/build_aar.py
 uv run python pipeline/train_aar.py
+uv run python pipeline/export_aar.py
 
 # Weather for any airport code (Meteostat)
 uv run python pipeline/fetch_weather.py --airports ATL DFW
