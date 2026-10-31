@@ -97,6 +97,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D43 | Flights in the repeated autumn daylight-saving hour are dropped; stated as an assumption | Claude (delegated by Calvin) |
 | D44 | WS3 review notes: AAR best model is selected on validation RMSE (not test); SARIMAX stays without weather as a time-series comparison, stated in results; YXY4NG fills in who approved xgboost in D23 | Claude (delegated by Calvin) |
 | D36 | Recommendation rules R1–R4 as in `src/lib/rules.ts` (R1 forecast < 85% of scheduled and ≥ 5 short → review arrival rate; R2 weather window lowers forecast → brief it with observation time; R3 ≥ 3 flights in one local hour above the D21 threshold → notify airlines / Command Center; R4 80% range > 60% of forecast → low confidence, check live traffic), approved | Claude (delegated by Calvin) |
+| D45 | Dashboard reorganised into 4 tabs, main target first: 1 Delay risk (flights sorted by risk, alert line, reasons, actual) · 2 Arrival capacity (AAR bonus) · 3 Historical trends (rates) · 4 Model evidence; recommendations + briefing beside tabs 1–2; every number labelled with its model. Calvin's Claude rebuilds `src/app/page.tsx` (YXY4NG pauses `src/` edits until pushed) | Calvin |
 
 ### Open
 
