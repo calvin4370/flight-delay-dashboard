@@ -118,11 +118,16 @@ function Factors({ factors }: { factors: Factor[] }) {
 
 function Recs({ recs }: { recs: Recommendation[] }) {
   if (recs.length === 0) return <p className="text-neutral-500">No rule fired.</p>;
-  const tone = { high: "border-red-500", medium: "border-amber-500", info: "border-sky-500" };
+  const tone = {
+    high: "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-200",
+    medium: "bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200",
+    info: "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-200",
+  };
   return (
-    <ul className="space-y-2">
+    <ul className="space-y-3">
       {recs.map((r, i) => (
-        <li key={i} className={`border-l-4 pl-3 ${tone[r.severity]}`}>
+        <li key={i} className="rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
+          <p className="mb-1"><span className={`rounded px-1.5 py-0.5 text-xs font-medium ${tone[r.severity]}`}>{r.severity === "high" ? "Act" : r.severity === "medium" ? "Watch" : "Check"}</span></p>
           <p className="font-medium">{r.title}</p>
           <p>{r.action}</p>
           <p className="text-xs text-neutral-500">Rule fired: {r.rule}</p>
@@ -142,9 +147,12 @@ async function RiskBoard({ day, airport, date, horizon }: { day: AarHour[]; airp
   return (
     <div className="grid gap-6 lg:grid-cols-[2fr_1fr]">
       <section>
-        <h2 className="mb-2 font-semibold">{airport} {date}: hourly arrival forecast, {horizon} h ahead</h2>
+        <h2 className="mb-1 font-semibold">{airport} {date}: hourly arrival forecast, {horizon} h ahead</h2>
+        <p className="mb-2 text-xs text-neutral-600 dark:text-neutral-400">
+          Shaded rows: forecast below 85% of scheduled arrivals (rule R1). Factors show each input&apos;s effect on the forecast in arrivals (SHAP) and when the weather was observed.
+        </p>
         {day.length === 0 ? <p>No forecast for this day.</p> : (
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse tabular-nums">
             <thead className="text-left text-xs text-neutral-500">
               <tr><th>Local hour</th><th>Scheduled</th><th>Forecast (80% range)</th><th>Actual</th><th>Why (top factors, SHAP)</th></tr>
             </thead>
@@ -166,7 +174,7 @@ async function RiskBoard({ day, airport, date, horizon }: { day: AarHour[]; airp
         )}
         <h2 className="mb-2 mt-6 font-semibold">Flights at severe-delay risk (&gt; 45 min), {horizon} h ahead</h2>
         {!df ? <Missing what="data/outputs/delay_flights.json" /> : flights.length === 0 ? <p>No flights in the sample for this day.</p> : (
-          <table className="w-full border-collapse">
+          <table className="w-full border-collapse tabular-nums">
             <thead className="text-left text-xs text-neutral-500">
               <tr><th>Sched local</th><th>Flight</th><th>Route</th><th>Risk</th><th>Alert</th><th>Actual</th><th>Why</th></tr>
             </thead>
@@ -177,7 +185,7 @@ async function RiskBoard({ day, airport, date, horizon }: { day: AarHour[]; airp
                   <td>{f.carrier}{f.flight_number}</td>
                   <td>{f.origin}→{f.dest}</td>
                   <td>{(f.risk * 100).toFixed(0)}%</td>
-                  <td>{f.alert ? "⚠ alert" : ""}</td>
+                  <td>{f.alert && <span className="rounded bg-red-100 px-1.5 py-0.5 text-xs font-medium text-red-800 dark:bg-red-950 dark:text-red-200">Alert</span>}</td>
                   <td>{f.actual_severe == null ? "n/a" : f.actual_severe ? "severe" : "ok"}</td>
                   <td><Factors factors={f.top_factors ?? []} /></td>
                 </tr>
@@ -218,7 +226,7 @@ function AarView({ day }: { day: AarHour[] }) {
         ))}
       </svg>
       <p className="text-xs text-neutral-500">Grey bar: scheduled · blue dot + band: model forecast and 80% range · dashed: baseline (D22) · red dot: actual.</p>
-      <table className="mt-4 w-full max-w-4xl border-collapse text-xs">
+      <table className="mt-4 w-full max-w-4xl border-collapse text-xs tabular-nums">
         <thead className="text-left text-neutral-500"><tr><th>Hour</th><th>Scheduled</th><th>Baseline</th><th>SARIMAX</th><th>Model</th><th>80% range</th><th>Actual</th></tr></thead>
         <tbody>{day.map((h) => (
           <tr key={h.time_utc} className="border-t border-neutral-200 dark:border-neutral-800">
@@ -281,7 +289,7 @@ function GenericTables({ data }: { data: unknown }) {
   if (Array.isArray(data)) {
     const cols = [...new Set(data.flatMap((r) => (r && typeof r === "object" ? Object.keys(r) : [])))];
     return (
-      <table className="mb-4 w-full border-collapse text-xs">
+      <table className="mb-4 w-full border-collapse text-xs tabular-nums">
         <thead className="text-left text-neutral-500"><tr>{cols.map((c) => <th key={c}>{c}</th>)}</tr></thead>
         <tbody>{data.slice(0, 200).map((r, i) => (
           <tr key={i} className="border-t border-neutral-200 dark:border-neutral-800">
@@ -307,7 +315,7 @@ function Failures({ cases }: { cases: FailureCase[] }) {
   return (
     <ul className="space-y-3">
       {cases.map((f, i) => (
-        <li key={i} className="border-l-4 border-red-500 pl-3">
+        <li key={i} className="rounded-md border border-neutral-200 p-3 dark:border-neutral-800">
           <p className="font-medium">{f.airport} {f.time_utc}: {f.what_happened}</p>
           <p className="text-xs">Predicted {String(f.predicted)} · actual {String(f.actual)}</p>
           <p className="text-xs"><b>Why:</b> {f.reason}</p>
@@ -331,7 +339,7 @@ async function Performance() {
               Train {m.split.train.join(" – ")} · validation {m.split.validation.join(" – ")} · test {m.split.test.join(" – ")} ({m.test_rows.toLocaleString()} rows).
               Selected: <b>{m.selected_model}</b> on {m.selected_on}. {m.selection_note}
             </p>
-            <table className="w-full border-collapse text-xs">
+            <table className="w-full border-collapse text-xs tabular-nums">
               <thead className="text-left text-neutral-500"><tr><th>Model</th><th>Validation</th>{keys.map((k) => <th key={k}>Test {k}</th>)}</tr></thead>
               <tbody>{[m.baseline, ...m.models].map((mod) => (
                 <tr key={mod.name} className={`border-t border-neutral-200 dark:border-neutral-800 ${mod.name === m.selected_model ? "font-semibold" : ""}`}>
