@@ -34,11 +34,11 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | [x] | Scripts download and process public data with no manual steps | Brief: want to see | WS1 |
 | [x] | No leakage: only weather observed ≥ 3 h before the scheduled time; use the hourly file | Brief: avoid + update | D4, WS1 |
 | [x] | Use crosswind and tailwind components, not raw wind speed | Brief: avoid | WS1 |
-| [ ] | Pipeline accepts any airport code (IATA or ICAO); demo and score on ATL and DFW | Brief: avoid + update | D13, WS1 |
+| [ ] | Pipeline accepts any airport code (IATA or ICAO); demo and score on ATL and DFW | Brief: avoid + update | D13, WS1 — resolver + AAR pipeline done (`a2aa764`); delay pipeline: Calvin to import `resolve_airport` / `hourly_weather` |
 | [x] | Compare delay rates, not raw delay minutes, across airports | Brief: avoid + data guide | WS5 |
 | [x] | Ignore placeholder columns `wpgt_*` and `snow_*` | Update + data guide | WS1 |
 | [x] | External data only if public, cited and fetched by a script; no paid or private data | Update | WS1 |
-| [ ] | State assumptions clearly in the demo | Update | WS8 |
+| [x] | State assumptions clearly in the demo | Update | WS8 — Assumptions panel on every app view (`7563f54`); pitch: Calvin |
 | [x] | Named user, current process, cost in time, money or risk | Rubric: problem realism | D6, WS8 |
 | [ ] | Working end to end, tested beyond a scripted demo; LLM for reading/explanation, statistics/ML for detection | Rubric: technical soundness | WS1–7 |
 | [x] | Baseline, measured results, a visible failure case with a reason, and how the user knows | Rubric: honest evaluation | D22, D28, WS7 |
@@ -182,9 +182,9 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [x] Convert flight times to UTC (D40) and join weather under the 3-hour rule (D4, D10) (Calvin + Claude) — delay: `pipeline/build_delay.py`, leakage asserts pass
 - [x] Build features (D12), using crosswind/tailwind and excluding `wpgt_*` / `snow_*` (Calvin + Claude) — delay: `pipeline/build_delay.py`
 - [ ] Leakage check
-- [ ] Accept any airport code (IATA/ICAO) (D13)
+- [~] Accept any airport code (IATA/ICAO) (D13) — AAR side done (YXY4NG + Claude, `a2aa764`); delay side: Calvin
 - [ ] Cite all data sources
-- [~] Hourly weather fetch for any airport code (D13) (YXY4NG + Claude) — `pipeline/fetch_weather.py` (`2b5d9fa`), reproduces the provided ATL/DFW file 100%; airport lookup per D39 option A still to wire in
+- [x] Hourly weather fetch for any airport code (D13, D39 A) (YXY4NG + Claude, `a2aa764`) — **interface for build_delay.py:** `from fetch_weather import resolve_airport, hourly_weather`; `resolve_airport("KORD")` → `{iata, icao, name, lat, lon, station, station_match, tz, runway_heading_deg, heading_source}`; `hourly_weather("ORD", "2023-01-01", "2025-07-31")` → DataFrame with exactly the provided weather file's columns and time format (+ `station`, `heading_source`). Runway heading: brief for ATL/DFW, else most common runway direction in OurAirports (assumption). Checked ATL, KDFW, ORD, KJFK; ATL/DFW reproduce the provided file 100%
 
 ### 2. Delay classifier (D16, D17) — Calvin (D41)
 - [x] Baseline (D22) (Calvin + Claude) — `pipeline/train_delay.py`; test PR-AUC 0.157
@@ -210,7 +210,7 @@ Status: done end to end (15:06). Test RMSE (arrivals/h): baseline 11.29 · RF 8.
 
 ### 4. Pipeline → app contract — YXY4NG (D41)
 - [x] Define contract (D24, D35) (YXY4NG + Claude) — approved in D35
-- [~] Export predictions — AAR done (`pipeline/export_aar.py` → `aar_forecast.json`, `aar_metrics.json`); delay files: Calvin
+- [x] Export predictions — AAR (`pipeline/export_aar.py`) and delay (Calvin) files in the D35 format; app reads both (`7563f54`)
 
 ### 5. App (Next.js) — YXY4NG (D41)
 - [x] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance (YXY4NG + Claude, `61566aa`); delay sections fill in when `delay_flights/metrics/trends.json` are exported
