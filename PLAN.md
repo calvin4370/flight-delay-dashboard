@@ -77,7 +77,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D20 | Hyperparameter tuning with Optuna; tune delays on PR-AUC, AAR on RMSE | Calvin |
 | D21 | Delay alert threshold: maximise F1 on the validation period; report precision, recall, accuracy and confusion matrix at that threshold | Calvin |
 | D22 | Baselines, computed from the training period only: delays = historical severe rate for the same airport, direction, hour and month; AAR = historical average arrivals for the same airport, hour, day of week and month | Calvin |
-| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap | Calvin |
+| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap; **xgboost** (needed by D17/D18) | Calvin; xgboost approved by a team member in chat |
 | D24 | Contract: pipeline writes JSON to `data/outputs/` (flight risks, hourly AAR forecasts, metrics, trends); the Next.js app reads it directly | Calvin |
 | D25 | App views: Risk board (flights/hours with risk at 3/6/9/12 h + evidence), AAR forecast (vs baseline, next 3–12 h), Historical trends (rates, not minutes), Model performance (precision/recall/confusion matrix, RMSE vs baselines, failure case) | Calvin |
 | D26 | Recommendations: fixed rules on model outputs (each shows the rule that fired); Claude only words them in the briefing | Calvin |
@@ -132,10 +132,10 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [ ] Prediction explanations (D27)
 
 ### 3. AAR regressor (D5, D16, D18)
-- [ ] BTS fetch and AAR target (D7, D8)
-- [ ] Baseline (D22)
-- [ ] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11)
-- [ ] Report RMSE vs baseline
+- [~] BTS fetch and AAR target (D7, D8) (Claude, branch `AAR`) — `pipeline/fetch_bts.py`, `pipeline/build_aar.py`
+- [~] Baseline (D22) (Claude, branch `AAR`) — in `pipeline/train_aar.py`
+- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude, branch `AAR`) — `pipeline/train_aar.py`
+- [~] Report RMSE vs baseline (Claude, branch `AAR`) — `data/outputs/aar_metrics.json`
 
 ### 4. Pipeline → app contract
 - [ ] Define contract (D24, D35)

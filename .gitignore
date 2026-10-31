@@ -37,3 +37,8 @@ next-env.d.ts
 
 # Problem Statement
 docs/problem_statements/*
+
+# Large downloaded / generated data (BTS ~0.9 GB, features, models)
+data/raw/bts/
+data/processed/
+data/models/
