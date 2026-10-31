@@ -77,7 +77,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D20 | Hyperparameter tuning with Optuna; tune delays on PR-AUC, AAR on RMSE | Calvin |
 | D21 | Delay alert threshold: maximise F1 on the validation period; report precision, recall, accuracy and confusion matrix at that threshold | Calvin |
 | D22 | Baselines, computed from the training period only: delays = historical severe rate for the same airport, direction, hour and month; AAR = historical average arrivals for the same airport, hour, day of week and month | Calvin |
-| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap; **xgboost** (needed by D17/D18) | Calvin; xgboost approved by a team member in chat |
+| D23 | Packages approved: lightgbm, optuna, statsmodels, scikit-learn, shap; **xgboost** (needed by D17/D18) | Calvin; xgboost approved by YXY4NG |
 | D24 | Contract: pipeline writes JSON to `data/outputs/` (flight risks, hourly AAR forecasts, metrics, trends); the Next.js app reads it directly | Calvin |
 | D25 | App views: Risk board (flights/hours with risk at 3/6/9/12 h + evidence), AAR forecast (vs baseline, next 3–12 h), Historical trends (rates, not minutes), Model performance (precision/recall/confusion matrix, RMSE vs baselines, failure case) | Calvin |
 | D26 | Recommendations: fixed rules on model outputs (each shows the rule that fired); Claude only words them in the briefing | Calvin |
@@ -201,7 +201,7 @@ Status: BTS fetch and build done (14:40); training running (started 14:45).
 - [~] Report RMSE vs baseline (YXY4NG + Claude) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
 - [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
 - [x] Merge branch `AAR` into `main` (`16a46cd`, before the first run); branch deleted
-- [ ] Review notes from Calvin's Claude (YXY4NG to decide):
+- [x] Review notes from Calvin's Claude — decided in D44; validation-based selection done in `3dd46f7`:
   - `train_aar.py` line 249 picks the best model by **test** RMSE; D20 tunes on validation, so selecting on validation keeps the test score unseen
   - SARIMAX has no weather input and is one model per airport (D34 lists weather features; D16 says each model covers both airports)
   - D23 row: "approved by a team member in chat" — which team member?
