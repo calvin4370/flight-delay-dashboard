@@ -30,19 +30,19 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | [x] | Delay risk classification (main target): flights facing a severe delay (> 45 min); `ARR_DELAY > 45` arrivals, `DEP_DELAY > 45` departures at ATL/DFW | Brief + update | D3, WS2 |
 | [x] | Report precision and recall, not only accuracy | Update | D21, WS2 |
 | [x] | AAR (optional bonus): hourly AAR forecast, measured by RMSE | Brief + update | D5, WS3 |
-| [ ] | Interactive dashboard for ATC: risk scores, historical trends and recommendations | Brief: want to see | WS5 |
+| [x] | Interactive dashboard for ATC: risk scores, historical trends and recommendations | Brief: want to see | WS5 |
 | [x] | Scripts download and process public data with no manual steps | Brief: want to see | WS1 |
 | [x] | No leakage: only weather observed ≥ 3 h before the scheduled time; use the hourly file | Brief: avoid + update | D4, WS1 |
 | [x] | Use crosswind and tailwind components, not raw wind speed | Brief: avoid | WS1 |
 | [ ] | Pipeline accepts any airport code (IATA or ICAO); demo and score on ATL and DFW | Brief: avoid + update | D13, WS1 |
-| [ ] | Compare delay rates, not raw delay minutes, across airports | Brief: avoid + data guide | WS5 |
+| [x] | Compare delay rates, not raw delay minutes, across airports | Brief: avoid + data guide | WS5 |
 | [x] | Ignore placeholder columns `wpgt_*` and `snow_*` | Update + data guide | WS1 |
 | [x] | External data only if public, cited and fetched by a script; no paid or private data | Update | WS1 |
 | [ ] | State assumptions clearly in the demo | Update | WS8 |
 | [x] | Named user, current process, cost in time, money or risk | Rubric: problem realism | D6, WS8 |
 | [ ] | Working end to end, tested beyond a scripted demo; LLM for reading/explanation, statistics/ML for detection | Rubric: technical soundness | WS1–7 |
 | [x] | Baseline, measured results, a visible failure case with a reason, and how the user knows | Rubric: honest evaluation | D22, D28, WS7 |
-| [ ] | Claims traceable to timestamped signals or applied rules; uncertainty visible; human stays in control | Rubric: trust & traceability | D27, WS5 |
+| [x] | Claims traceable to timestamped signals or applied rules; uncertainty visible; human stays in control | Rubric: trust & traceability | D27, WS5 |
 | [x] | Before/after vs the baseline, measured vs estimated kept separate; realistic adoption constraints | Rubric: impact | WS7 |
 | [ ] | Early first valid submission; pitch under 3 minutes | Rubric: time discipline + update | D32, WS8 |
 | [ ] | Submit before 4:15 PM | Update | WS8 |
