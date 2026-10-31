@@ -82,50 +82,77 @@ export type DelayFlight = {
 export type DelayMetrics = Record<string, unknown> & { threshold?: number; selected_model?: string };
 export type DelayTrends = Record<string, unknown>;
 
-type Cache = {
-  aar?: { selected_model: string; generated_utc: string; hours: AarHour[] } | null;
-  aarMetrics?: AarMetrics | null;
-  delayFlights?: { flights: DelayFlight[]; threshold?: number; generated_utc?: string } | null;
-  delayMetrics?: DelayMetrics | null;
-  delayTrends?: DelayTrends | null;
-  delayFailures?: FailureCase[] | null;
-};
-const cache: Cache = {};
+type AarFile = { selected_model: string; generated_utc: string; hours: AarHour[] };
+type DelayFile = { flights: DelayFlight[]; threshold?: number; generated_utc?: string };
 
-async function readJson<T>(name: string): Promise<T | null> {
-  try {
-    return JSON.parse(await readFile(path.join(OUTPUTS, name), "utf8")) as T;
-  } catch {
-    return null; // file not exported yet: views say so instead of guessing
+// Files are static between pipeline runs, so each is read and parsed once per server process. The promise is
+// cached (not the value) so concurrent first requests share one parse of the 46 MB forecast.
+const cache = new Map<string, Promise<unknown>>();
+
+function readJson<T>(name: string): Promise<T | null> {
+  if (!cache.has(name)) {
+    cache.set(name, readFile(path.join(OUTPUTS, name), "utf8").then((s) => JSON.parse(s) as T).catch(() => null));
   }
+  return cache.get(name) as Promise<T | null>; // null = not exported yet: views say so instead of guessing
 }
 
-export async function aarForecast() {
-  if (cache.aar === undefined) cache.aar = await readJson("aar_forecast.json");
-  return cache.aar;
-}
-export async function aarMetrics() {
-  if (cache.aarMetrics === undefined) cache.aarMetrics = await readJson<AarMetrics>("aar_metrics.json");
-  return cache.aarMetrics;
-}
-export async function delayFlights() {
-  if (cache.delayFlights === undefined) cache.delayFlights = await readJson("delay_flights.json");
-  return cache.delayFlights;
-}
-export async function delayMetrics() {
-  if (cache.delayMetrics === undefined) cache.delayMetrics = await readJson<DelayMetrics>("delay_metrics.json");
-  return cache.delayMetrics;
-}
-export async function delayTrends() {
-  if (cache.delayTrends === undefined) cache.delayTrends = await readJson<DelayTrends>("delay_trends.json");
-  return cache.delayTrends;
-}
+export const aarForecast = () => readJson<AarFile>("aar_forecast.json");
+export const aarMetrics = () => readJson<AarMetrics>("aar_metrics.json");
+export const delayFlights = () => readJson<DelayFile>("delay_flights.json");
+export const delayMetrics = () => readJson<DelayMetrics>("delay_metrics.json");
+export const delayTrends = () => readJson<DelayTrends>("delay_trends.json");
 export async function delayFailureCases() {
-  if (cache.delayFailures === undefined) {
-    const raw = await readJson<FailureCase[] | { failure_cases: FailureCase[] }>("delay_failure_cases.json");
-    cache.delayFailures = raw ? (Array.isArray(raw) ? raw : raw.failure_cases) : null;
-  }
-  return cache.delayFailures;
+  const raw = await readJson<FailureCase[] | { failure_cases: FailureCase[] }>("delay_failure_cases.json");
+  return raw ? (Array.isArray(raw) ? raw : raw.failure_cases) : null;
+}
+
+export type RateRow = { airport: string; key: string; rate: number };
+export type AarIndex = {
+  airports: string[];
+  dates: Map<string, string[]>; // airport -> sorted local dates
+  day: Map<string, AarHour[]>; // `${airport}|${horizon}|${localDate}` -> hours
+  rates: { month: RateRow[]; hour: RateRow[] }; // arrivals landed / scheduled, 3 h rows (rates, not counts)
+};
+
+let indexPromise: Promise<AarIndex | null> | undefined;
+
+// One pass over the forecast builds every lookup the views need, instead of re-scanning 76k rows per request.
+export function aarIndex(): Promise<AarIndex | null> {
+  indexPromise ??= aarForecast().then((f) => {
+    if (!f) return null;
+    const day = new Map<string, AarHour[]>();
+    const dates = new Map<string, Set<string>>();
+    const agg = new Map<string, { a: number; s: number }>();
+    for (const h of f.hours) {
+      const date = h.time_local.slice(0, 10);
+      const k = `${h.airport}|${h.horizon_h}|${date}`;
+      const list = day.get(k);
+      if (list) list.push(h); else day.set(k, [h]);
+      let ds = dates.get(h.airport);
+      if (!ds) dates.set(h.airport, (ds = new Set()));
+      ds.add(date);
+      if (h.horizon_h === 3 && h.actual_arrivals != null) {
+        for (const key of [`${h.airport}|month|${h.time_local.slice(0, 7)}`, `${h.airport}|hour|${h.time_local.slice(11, 13)}`]) {
+          const v = agg.get(key) ?? { a: 0, s: 0 };
+          v.a += h.actual_arrivals;
+          v.s += h.scheduled_arrivals;
+          agg.set(key, v);
+        }
+      }
+    }
+    const rows = (kind: string) =>
+      [...agg.entries()]
+        .filter(([k]) => k.split("|")[1] === kind)
+        .map(([k, v]) => ({ airport: k.split("|")[0], key: k.split("|")[2], rate: v.s ? v.a / v.s : 0 }))
+        .sort((a, b) => a.key.localeCompare(b.key) || a.airport.localeCompare(b.airport));
+    return {
+      airports: [...dates.keys()].sort(),
+      dates: new Map([...dates].map(([a, s]) => [a, [...s].sort()])),
+      day,
+      rates: { month: rows("month"), hour: rows("hour") },
+    };
+  });
+  return indexPromise;
 }
 
 export const HORIZONS = [3, 6, 9, 12] as const;

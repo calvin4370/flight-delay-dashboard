@@ -1,7 +1,7 @@
 import Link from "next/link";
 import {
-  aarForecast, aarMetrics, delayFailureCases, delayFlights, delayMetrics, delayTrends, HORIZONS,
-  type AarHour, type FailureCase, type Factor,
+  aarForecast, aarIndex, aarMetrics, delayFailureCases, delayFlights, delayMetrics, delayTrends, HORIZONS,
+  type AarHour, type FailureCase, type Factor, type RateRow,
 } from "@/lib/data";
 import { aarRules, delayRules, RULE_TEXT, RULES_STATUS, type Recommendation } from "@/lib/rules";
 import Briefing from "./briefing";
@@ -20,16 +20,16 @@ function one(v: string | string[] | undefined) {
 
 export default async function Page({ searchParams }: { searchParams: Search }) {
   const sp = await searchParams;
-  const [forecast, metrics] = await Promise.all([aarForecast(), aarMetrics()]);
-  const hours = forecast?.hours ?? [];
-  const airports = [...new Set(hours.map((h) => h.airport))].sort();
+  // All sources start together (async-parallel); each file is parsed once per server process.
+  const [forecast, index, metrics] = await Promise.all([aarForecast(), aarIndex(), aarMetrics()]);
+  const airports = index?.airports ?? [];
   const view = one(sp.view) ?? "risk";
   const airport = one(sp.airport) ?? airports[0] ?? "ATL";
   const horizon = Number(one(sp.h) ?? 3);
-  const dates = [...new Set(hours.filter((h) => h.airport === airport).map((h) => h.time_local.slice(0, 10)))].sort();
+  const dates = index?.dates.get(airport) ?? [];
   const failureDays = (metrics?.failure_cases ?? []).filter((f) => f.airport === airport).map((f) => f.time_utc.slice(0, 10));
   const date = one(sp.date) ?? failureDays[0] ?? dates[0] ?? "";
-  const day = hours.filter((h) => h.airport === airport && h.horizon_h === horizon && h.time_local.startsWith(date));
+  const day = index?.day.get(`${airport}|${horizon}|${date}`) ?? [];
   const q = (o: Record<string, string | number>) =>
     "/?" + new URLSearchParams({ view, airport, date, h: String(horizon), ...Object.fromEntries(Object.entries(o).map(([k, v]) => [k, String(v)])) }).toString();
 
@@ -84,7 +84,7 @@ export default async function Page({ searchParams }: { searchParams: Search }) {
       {!forecast && <Missing what="data/outputs/aar_forecast.json" />}
       {view === "risk" && forecast && <RiskBoard day={day} airport={airport} date={date} horizon={horizon} />}
       {view === "aar" && forecast && <AarView day={day} />}
-      {view === "trends" && <Trends hours={hours} />}
+      {view === "trends" && <Trends rates={index?.rates ?? null} />}
       {view === "performance" && <Performance />}
 
       <footer className="mt-8 border-t border-neutral-300 pt-3 text-xs text-neutral-500 dark:border-neutral-700">
@@ -240,26 +240,14 @@ function AarView({ day }: { day: AarHour[] }) {
   );
 }
 
-async function Trends({ hours }: { hours: AarHour[] }) {
+async function Trends({ rates }: { rates: { month: RateRow[]; hour: RateRow[] } | null }) {
   const trends = await delayTrends();
-  // Realised arrivals as a share of scheduled (a rate, comparable across airports), test period, 3 h rows.
-  const agg = new Map<string, { a: number; s: number }>();
-  for (const h of hours) {
-    if (h.horizon_h !== 3 || h.actual_arrivals == null) continue;
-    for (const key of [`${h.airport}|month|${h.time_local.slice(0, 7)}`, `${h.airport}|hour|${h.time_local.slice(11, 13)}`]) {
-      const v = agg.get(key) ?? { a: 0, s: 0 };
-      v.a += h.actual_arrivals; v.s += h.scheduled_arrivals; agg.set(key, v);
-    }
-  }
-  const rows = (kind: string) => [...agg.entries()].filter(([k]) => k.split("|")[1] === kind)
-    .map(([k, v]) => ({ airport: k.split("|")[0], key: k.split("|")[2], rate: v.s ? v.a / v.s : 0 }))
-    .sort((a, b) => a.key.localeCompare(b.key) || a.airport.localeCompare(b.airport));
   return (
     <div className="grid gap-6 lg:grid-cols-2">
       {(["month", "hour"] as const).map((kind) => (
         <section key={kind}>
           <h2 className="mb-2 font-semibold">Arrivals landed as a share of scheduled, by {kind === "month" ? "month" : "local hour"}</h2>
-          <RateBars rows={rows(kind)} />
+          {rates ? <RateBars rows={rates[kind]} /> : <Missing what="data/outputs/aar_forecast.json" />}
         </section>
       ))}
       <section className="lg:col-span-2">
@@ -270,7 +258,7 @@ async function Trends({ hours }: { hours: AarHour[] }) {
   );
 }
 
-function RateBars({ rows }: { rows: { airport: string; key: string; rate: number }[] }) {
+function RateBars({ rows }: { rows: RateRow[] }) {
   return (
     <ul className="space-y-0.5 text-xs">
       {rows.map((r) => (
