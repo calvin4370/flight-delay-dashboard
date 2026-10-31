@@ -191,7 +191,7 @@ Goal: each person works in their own files on `main`, so changes land one after 
 - [x] Train RF, XGBoost, LightGBM with Optuna on PR-AUC (D20) using the split (D11) (Calvin + Claude) — Random Forest selected on validation (0.225); test PR-AUC 0.235
 - [x] Threshold by max F1 on validation (D21) (Calvin + Claude) — risk ≥ 0.141
 - [x] Report precision, recall, accuracy, confusion matrix vs baseline (Calvin + Claude) — `docs/EVALUATION.md`
-- [~] Prediction explanations (D27) (Calvin + Claude) — exact TreeSHAP running, ~15:16; then `export_delay.py` writes the D35 files
+- [x] Prediction explanations (D27) (Calvin + Claude) — exact TreeSHAP for all 43,260 test predictions; top 3 factors with observation times in `data/outputs/delay_flights.json`
 - [x] Feature study on validation (Calvin + Claude) — `pipeline/feature_study_delay.py`: weather adds +16–18% PR-AUC; route / holiday / 3 h trend don't help consistently; features unchanged
 
 ### 3. AAR regressor (D5, D16, D18) — YXY4NG (D41)
