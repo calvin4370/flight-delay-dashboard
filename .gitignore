@@ -45,3 +45,6 @@ data/models/
 
 # Impeccable engine binary (platform-specific; installed by npx impeccable install)
 .claude/skills/impeccable/scripts/bin/
+
+# Python cache
+__pycache__/
