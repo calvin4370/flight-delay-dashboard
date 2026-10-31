@@ -48,7 +48,11 @@ export async function POST(request: Request) {
     return Response.json({ facts, briefing: null, error: `Claude API error ${res.status}: ${(await res.text()).slice(0, 300)}` });
   }
   const body = (await res.json()) as { content: { type: string; text?: string }[]; stop_reason?: string };
-  const briefing = body.content.filter((c) => c.type === "text").map((c) => c.text).join("\n");
+  const briefing = body.content.filter((c) => c.type === "text").map((c) => c.text).join("
+").trim();
+  if (!briefing) {
+    return Response.json({ facts, briefing: null, stop_reason: body.stop_reason, error: `Claude returned no text (stop reason: ${body.stop_reason ?? "unknown"}). Try again; the facts below are unchanged.` });
+  }
   // Say so when the text was cut off rather than presenting a partial briefing as complete.
   const error = body.stop_reason === "max_tokens" ? "Briefing was cut off by the length limit; the text below is incomplete." : undefined;
   return Response.json({ facts, briefing, model: MODEL, stop_reason: body.stop_reason, error });
