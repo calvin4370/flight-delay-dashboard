@@ -15,23 +15,27 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
+from fetch_weather import hourly_weather, resolve_airport
+
 ROOT = Path(__file__).resolve().parent.parent
 BTS = ROOT / "data" / "processed" / "bts_flights.csv.gz"
 WEATHER = ROOT / "data" / "raw" / "challenge5_hourly_weather_ATL_DFW.csv"
 OUT_HOURLY = ROOT / "data" / "processed" / "aar_hourly.csv.gz"
 OUT_FEATURES = ROOT / "data" / "processed" / "aar_features.csv.gz"
 
-# Time zone per airport. A new airport needs a row here and hourly weather (D13: only ATL/DFW weather is provided).
-TIMEZONES = {"ATL": "America/New_York", "DFW": "America/Chicago"}
+# ATL/DFW use the provided weather file; any other airport is resolved and fetched by fetch_weather.py (D13, D39).
 HORIZONS = [3, 6, 9, 12]
 WINDOW_H = 10  # issue hour and the 9 hours before it: the 3-12 h window at the 3 h horizon
 START, END = "2023-01-01 00:00", "2025-07-31 23:00"
 
 
 def to_iata(code: str) -> str:
-    """Accept IATA (ATL) or ICAO (KATL); US ICAO codes are K + IATA."""
-    code = code.upper()
-    return code[1:] if len(code) == 4 and code.startswith("K") else code
+    """Accept IATA (ATL) or ICAO (KATL) via the OurAirports lookup."""
+    return resolve_airport(code)["iata"]
+
+
+def tz_of(airport: str) -> str:
+    return resolve_airport(airport)["tz"]
 
 
 def minutes(hhmm: pd.Series) -> pd.Series:
@@ -59,7 +63,7 @@ def arrivals_for(bts: pd.DataFrame, airport: str) -> pd.DataFrame:
     on = on.where(on - gate <= pd.Timedelta(hours=12), on - pd.Timedelta(days=1))
     on = on.where(gate - on <= pd.Timedelta(hours=12), on + pd.Timedelta(days=1))
 
-    tz = TIMEZONES[airport]
+    tz = tz_of(airport)
     return pd.DataFrame({
         "sched_hour": local_to_utc_hour(sched_local, tz),
         "actual_hour": local_to_utc_hour(on, tz).where(landed),
@@ -72,7 +76,7 @@ def hourly_table(bts: pd.DataFrame, airport: str) -> pd.DataFrame:
     t = pd.DataFrame(index=hours)
     t["arrivals"] = arr["actual_hour"].value_counts().reindex(hours, fill_value=0)
     t["scheduled_arrivals"] = arr["sched_hour"].value_counts().reindex(hours, fill_value=0)
-    local = t.index.tz_localize("UTC").tz_convert(TIMEZONES[airport]).tz_localize(None)
+    local = t.index.tz_localize("UTC").tz_convert(tz_of(airport)).tz_localize(None)
     t["local_hour"], t["day_of_week"], t["month"] = local.hour, local.day_of_week, local.month
     t["local_date"] = local.normalize()
     t["airport"] = airport
@@ -82,7 +86,10 @@ def hourly_table(bts: pd.DataFrame, airport: str) -> pd.DataFrame:
 def weather_features(airport: str) -> pd.DataFrame:
     """Per issue hour: latest observation plus summaries of the WINDOW_H hours ending at the issue hour."""
     w = pd.read_csv(WEATHER, parse_dates=["time_utc"])
-    w = w[w["airport"] == airport].set_index("time_utc").sort_index()
+    w = w[w["airport"] == airport]
+    if w.empty:  # not in the provided file: fetch from the same public source by script
+        w = hourly_weather(airport, START[:10], END[:10]).assign(time_utc=lambda d: pd.to_datetime(d["time_utc"]))
+    w = w.set_index("time_utc").sort_index()
     w = w.reindex(pd.date_range(w.index.min(), w.index.max(), freq="h"))
     code = w["condition_code"]
     rain = (w["precip_mm"] > 0).astype(float)
@@ -111,9 +118,6 @@ def main() -> None:
     p.add_argument("--airports", nargs="+", default=["ATL", "DFW"])
     args = p.parse_args()
     airports = [to_iata(a) for a in args.airports]
-    missing = [a for a in airports if a not in TIMEZONES]
-    if missing:
-        raise SystemExit(f"no time zone / weather configured for {missing}; add them to TIMEZONES and the weather file")
 
     bts = pd.read_csv(BTS, low_memory=False)
     hourly = pd.concat([hourly_table(bts, a) for a in airports], ignore_index=True)
