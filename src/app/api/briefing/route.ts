@@ -39,14 +39,17 @@ export async function POST(request: Request) {
     method: "POST",
     headers: { "content-type": "application/json", "x-api-key": key, "anthropic-version": "2023-06-01" },
     body: JSON.stringify({
-      model: MODEL, max_tokens: 700, system: SYSTEM,
+      // Room for the model's own reasoning plus a ~220-word briefing; a short limit cut briefings off mid-sentence.
+      model: MODEL, max_tokens: 4000, system: SYSTEM,
       messages: [{ role: "user", content: `Facts (JSON):\n${JSON.stringify(facts)}` }],
     }),
   });
   if (!res.ok) {
     return Response.json({ facts, briefing: null, error: `Claude API error ${res.status}: ${(await res.text()).slice(0, 300)}` });
   }
-  const body = (await res.json()) as { content: { type: string; text?: string }[] };
+  const body = (await res.json()) as { content: { type: string; text?: string }[]; stop_reason?: string };
   const briefing = body.content.filter((c) => c.type === "text").map((c) => c.text).join("\n");
-  return Response.json({ facts, briefing, model: MODEL });
+  // Say so when the text was cut off rather than presenting a partial briefing as complete.
+  const error = body.stop_reason === "max_tokens" ? "Briefing was cut off by the length limit; the text below is incomplete." : undefined;
+  return Response.json({ facts, briefing, model: MODEL, stop_reason: body.stop_reason, error });
 }
