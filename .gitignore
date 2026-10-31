@@ -37,3 +37,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# Problem Statement
+docs/Autonomous_SG_Problem_Statement.pdf
