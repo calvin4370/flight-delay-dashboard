@@ -73,7 +73,7 @@ def hourly_table(bts: pd.DataFrame, airport: str) -> pd.DataFrame:
     t["arrivals"] = arr["actual_hour"].value_counts().reindex(hours, fill_value=0)
     t["scheduled_arrivals"] = arr["sched_hour"].value_counts().reindex(hours, fill_value=0)
     local = t.index.tz_localize("UTC").tz_convert(TIMEZONES[airport]).tz_localize(None)
-    t["local_hour"], t["day_of_week"], t["month"] = local.hour, local.dayofweek, local.month
+    t["local_hour"], t["day_of_week"], t["month"] = local.hour, local.day_of_week, local.month
     t["local_date"] = local.normalize()
     t["airport"] = airport
     return t.rename_axis("time_utc").reset_index()
