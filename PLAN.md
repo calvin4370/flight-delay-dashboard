@@ -40,7 +40,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | [x] | External data only if public, cited and fetched by a script; no paid or private data | Update | WS1 |
 | [x] | State assumptions clearly in the demo | Update | WS8 — Assumptions panel on every app view (`7563f54`); pitch: Calvin |
 | [x] | Named user, current process, cost in time, money or risk | Rubric: problem realism | D6, WS8 |
-| [ ] | Working end to end, tested beyond a scripted demo; LLM for reading/explanation, statistics/ML for detection | Rubric: technical soundness | WS1–7 |
+| [x] | | Working end to end, tested beyond a scripted demo; LLM for reading/explanation, statistics/ML for detection | Rubric: technical soundness | WS1–7 |
 | [x] | Baseline, measured results, a visible failure case with a reason, and how the user knows | Rubric: honest evaluation | D22, D28, WS7 |
 | [x] | Claims traceable to timestamped signals or applied rules; uncertainty visible; human stays in control | Rubric: trust & traceability | D27, WS5 |
 | [x] | Before/after vs the baseline, measured vs estimated kept separate; realistic adoption constraints | Rubric: impact | WS7 |
