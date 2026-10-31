@@ -147,20 +147,20 @@ Goal: each person works in their own files on `main`, so changes land one after 
 
 ### 1. Data pipeline — delay side: Calvin · any-airport fetch: YXY4NG (D41)
 - [ ] Load provided data (D30) and fetch external data by script (D7, D13)
-- [ ] Build prediction targets (D3, D9)
-- [ ] Convert flight times to UTC (D40) and join weather under the 3-hour rule (D4, D10)
-- [ ] Build features (D12), using crosswind/tailwind and excluding `wpgt_*` / `snow_*`
+- [~] Build prediction targets (D3, D9) (Calvin + Claude) — delay: `pipeline/build_delay.py`
+- [~] Convert flight times to UTC (D40) and join weather under the 3-hour rule (D4, D10) (Calvin + Claude) — delay: `pipeline/build_delay.py`
+- [~] Build features (D12), using crosswind/tailwind and excluding `wpgt_*` / `snow_*` (Calvin + Claude) — delay: `pipeline/build_delay.py`
 - [ ] Leakage check
 - [ ] Accept any airport code (IATA/ICAO) (D13)
 - [ ] Cite all data sources
 - [~] Hourly weather fetch for any airport code (D13) (Claude) — `scripts/fetch_weather.py` (Meteostat bulk, not committed) reproduces the provided ATL/DFW file 100%; to move into `pipeline/` (D15); airport database still waits on D39
 
 ### 2. Delay classifier (D16, D17) — Calvin (D41)
-- [ ] Baseline (D22)
-- [ ] Train RF, XGBoost, LightGBM with Optuna on PR-AUC (D20) using the split (D11)
-- [ ] Threshold by max F1 on validation (D21)
-- [ ] Report precision, recall, accuracy, confusion matrix vs baseline
-- [ ] Prediction explanations (D27)
+- [~] Baseline (D22) (Calvin + Claude) — `pipeline/train_delay.py`
+- [~] Train RF, XGBoost, LightGBM with Optuna on PR-AUC (D20) using the split (D11) (Calvin + Claude)
+- [~] Threshold by max F1 on validation (D21) (Calvin + Claude)
+- [~] Report precision, recall, accuracy, confusion matrix vs baseline (Calvin + Claude)
+- [~] Prediction explanations (D27) (Calvin + Claude)
 
 ### 3. AAR regressor (D5, D16, D18) — YXY4NG (D41)
 Status: code written and on `main`; **not run end to end yet**. BTS download in progress.
