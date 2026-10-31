@@ -91,7 +91,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D40 | Flight local times are converted to UTC (per airport time zone) before matching to the hourly weather | Calvin |
 | D41 | Workload split as in "Workload split" below | Calvin, YXY4NG |
 | D42 | Weather features per horizon (brief: at horizon h, only weather observed ≥ h hours before): the reading at h hours before + summaries of the 10 hours ending there; applies to D12 and D34 | Calvin |
-| D32 | First valid submission by 15:30 (public repo with both models' outputs and a working app view); final by 16:05 | Claude (delegated by Calvin) |
+| D32 | No early submission: one submission before the 16:15 deadline (final by 16:05 as buffer) | Calvin |
 | D35 | Output contract: the D35 proposal below, approved. Export the **whole test period** (not only demo days) so the app works on any date; `top_factors[]` up to 3 per prediction to keep files small | Claude (delegated by Calvin) |
 | D39 | Airport data: option A (Meteostat station list + OurAirports), no new package | Claude (delegated by Calvin) |
 | D43 | Flights in the repeated autumn daylight-saving hour are dropped; stated as an assumption | Claude (delegated by Calvin) |
