@@ -1,31 +1,48 @@
-# 3-minute pitch (draft)
+# 3-minute pitch, presented from the dashboard
 
-Times are targets. Numbers from `docs/EVALUATION.md`.
+Open before starting: `http://localhost:3005/?view=delay&airport=ATL&date=2025-04-06&h=3`
+**Bold** = what to click. About 1:30 each.
 
-## 0:00–0:30 · The user and the problem (problem realism)
-- Our user is the **Traffic Management Coordinator** at Atlanta or Dallas Fort Worth: the person who sets the airport's arrival rate and asks for ground delay programs.
-- Today they cut rates **when the weather arrives**. By then aircraft are already airborne or pushing back, so they hold in the air or sit on taxiways burning fuel, and cancellations ripple through the day (challenge brief).
-- They need to know **3 to 12 hours earlier**, flight by flight and hour by hour.
+---
 
-## 0:30–1:15 · What we built (technical soundness), live demo
-- For every ATL/DFW departure and arrival, a **risk score** that it will be more than 45 minutes late, at 3, 6, 9 and 12 hours ahead. *Demo: risk board.*
-- For every hour, a forecast of **arrivals per hour** (AAR), with a range. *Demo: AAR view.*
-- Every score shows **why**: the top factors, with the time each weather reading was taken, including crosswind and tailwind on the runway. *Demo: evidence panel.*
-- Machine learning makes the predictions; **Claude only writes the shift briefing** from those outputs and says so when data is missing. Rule-based recommendations; **the TMC decides**. *Demo: briefing.*
-- Works with only weather known at forecast time (never newer than the horizon), and the pipeline takes any airport code.
+## Part 1 · Calvin (0:00–1:30): the problem and the delay model
 
-## 1:15–2:00 · Does it work? (honest evaluation)
-- Tested once on a full unseen year, Jul 2024 – Jul 2025, against the TMC's simplest reference: the usual delay rate for that hour and month.
-- Delay risk: **PR-AUC 0.235 vs 0.157**, precision 24% vs 17%, **32% fewer false alarms** while catching 6% more severe flights.
-- Useful even 12 hours out (PR-AUC 0.229 vs 0.157).
-- Weather is what makes the difference: adding it to the schedule raises PR-AUC by 16–18% for every algorithm we tried.
-- Arrivals per hour: **RMSE 8.7 vs 11.3** for the baseline, 23% less error, steady from 3 to 12 h ahead. A schedule-only time-series model (SARIMAX) is more accurate still (7.5), but it can't say why; we report it and keep the explainable weather model.
+**[Tab 1 · Delay risk, ATL, 6 Apr 2025, 3 h ahead]**
 
-## 2:00–2:30 · Where it fails, and how the TMC knows (trust & traceability)
-- 28 December 2024, Atlanta: 7 severe delays, none flagged. The cause was knock-on delays from the network (late aircraft, air traffic system), with no severe weather at ATL.
-- The TMC sees it: low risk **and** no severe weather in the evidence panel, so the score is not the whole story. Fix: inbound-aircraft and network inputs.
+- Our user is the **Traffic Management Coordinator** at Atlanta or Dallas Fort Worth: the person who sets the arrival rate and calls delay programs.
+- Today they react **when the weather arrives**. By then aircraft are already holding in the air or stuck on taxiways, burning fuel, and cancellations spread through the day.
+- We warn them **3 to 12 hours earlier**, flight by flight.
+- This is a replay of a real day from our test year. Every flight in or out of ATL gets a **risk of being more than 45 minutes late**, using only weather observed hours before.
+- Top of the page: the model flagged 7 flights, and **7 of the 8 that were actually late were caught**, with no false alarms.
+- Each flight shows **why**: the top factors and when each weather reading was taken. Point at a flagged row.
+- **[Lead time → 12 h ahead, Show]** The same day, warned 12 hours out.
 
-## 2:30–3:00 · Impact and limits
-- Measured on the test year: fewer false alarms means fewer wasted rate cuts and programs for the same or better catch rate. Effects at full traffic volume are an estimate.
-- Limits we state: weather observations only (no forecasts), a 1% flight sample, one training year, the brief's fixed runway headings.
-- Next: forecast data and inbound-aircraft delays.
+**[Tab 4 · Model evidence]**
+
+- Tested once on a full unseen year against the historical rate: precision **24% vs 17%**, **32% fewer false alarms**, 6% more late flights caught.
+- **[Known failure day 2024-12-28 on Tab 1]** Where it fails: 28 December, seven late flights, none flagged. The delays came from the network, not ATL's weather. The coordinator sees it: low risk and calm runway wind, so the score is not the whole story.
+
+---
+
+## Part 2 · Yuxuan (1:30–3:00): arrival capacity, actions and trust
+
+**[Tab 2 · Arrival capacity, same day]**
+
+- For each hour: how many aircraft will land, with an **80% range**, against the schedule, and what actually landed.
+- **[Click a shaded hour]** Why the forecast is low, with the time of each weather reading, and the rule that fired.
+- **[Runway wind strip]** We use crosswind and tailwind on the runway heading, not raw wind speed.
+
+**[Side panel]**
+
+- **Recommended actions** come from fixed rules on the model outputs, for example "forecast below 85% of schedule: review the arrival rate". The rule is always shown.
+- **[Shift briefing]** Claude writes the coordinator's briefing only from these outputs, and says so when data is missing. The models predict; Claude explains; **the coordinator decides**.
+
+**[Tab 3 · Historical trends]**
+
+- History as rates, not raw minutes, so busy and quiet airports compare fairly.
+
+**[Tab 4 · Model evidence, Impact box]**
+
+- Arrival forecast: **23% lower error** than the historical average. Measured on the test year; full-traffic effects are estimates.
+- Limits we state: weather observations only, a 1% flight sample, one training year, the brief's fixed runway headings. The pipeline takes any airport code.
+- Close: earlier, explained warnings, with the coordinator in control.
