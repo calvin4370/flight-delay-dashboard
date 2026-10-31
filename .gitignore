@@ -28,9 +28,6 @@ yarn-error.log*
 .env*.local
 .env
 
-# data (large local datasets)
-/data/
-
 # vercel
 .vercel
 
@@ -39,4 +36,4 @@ yarn-error.log*
 next-env.d.ts
 
 # Problem Statement
-docs/Autonomous_SG_2026_Airbus_Track.pdf
+docs/problem_statements/*
