@@ -1,0 +1,20 @@
+[
+  {
+    "airport": "ATL",
+    "time_utc": "2024-12-28",
+    "what_happened": "7 of 11 ATL flights that day were more than 45 min late; the model flagged none of them at the 3 h horizon (mean risk 0.09, alert threshold 0.141).",
+    "predicted": "no alert for any of the 7 severe flights",
+    "actual": "7 severe delays; delay minutes by cause: late-arriving aircraft 51%, air traffic system (NAS) 27%, airline 22%, weather 0%",
+    "reason": "The delays came from the network (late inbound aircraft and air traffic system), not from weather at ATL, which only had light rain (max 4.8 mm/h, no severe weather in the window). The model only sees local weather and the schedule, so knock-on delays from elsewhere are invisible to it. This day also falls in the post-Christmas travel peak, which the model only knows as 'December'.",
+    "how_user_knows": "The risk board shows low risk and the evidence panel shows no severe weather in the 3-12 h window: the score is weather-driven, so the TMC must still check inbound delays and national traffic management advisories. What would fix it: inbound-aircraft delay and network status as inputs (needs full BTS flight data with tail numbers)."
+  },
+  {
+    "airport": "DFW",
+    "time_utc": "2024-12-28",
+    "what_happened": "7 of 14 DFW flights that day were more than 45 min late; the model flagged only 1 of them at the 3 h horizon (mean risk 0.08).",
+    "predicted": "1 alert for 7 severe flights",
+    "actual": "7 severe delays; delay minutes by cause: late-arriving aircraft 46%, airline 28%, air traffic system (NAS) 22%, weather 4%",
+    "reason": "A thunderstorm was observed in the window, but winter thunderstorms are rare in the 2023 training year, so the model gives them little weight in December; most of the delay was also knock-on from the network on a peak travel day.",
+    "how_user_knows": "The evidence panel shows a thunderstorm flag next to a low risk score: a visible mismatch the TMC can act on. What would fix it: more training years (or forecast data) so rare-season storms are learned."
+  }
+]
