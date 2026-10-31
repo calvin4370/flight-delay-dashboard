@@ -1,6 +1,6 @@
 # Predictive Airport Capacity & Risk Model (ATL / DFW)
 
-Autonomous SG 2026 · Airbus Challenge 5: warn a **Traffic Management Coordinator (TMC)** at Atlanta (ATL) or Dallas Fort Worth (DFW) **3–12 hours ahead** which flights face a severe delay (> 45 min), and forecast the hourly **arrival acceptance rate (AAR)**.
+Autonomous SG 2026 (Team AirportFirstTake) · Airbus Challenge 5: warn a **Traffic Management Coordinator (TMC)** at Atlanta (ATL) or Dallas Fort Worth (DFW) **3–12 hours ahead** which flights face a severe delay (> 45 min), and forecast the hourly **arrival acceptance rate (AAR)**.
 
 ## The problem
 
