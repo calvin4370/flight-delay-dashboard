@@ -1,0 +1,119 @@
+{
+  "judged_on": "validation PR-AUC (Jan-Jun 2024); tuned settings of each saved model; LightGBM/XGBoost 3 seeds, Random Forest 1 seed",
+  "results": {
+    "lightgbm": {
+      "schedule only (no weather)": {
+        "validation_pr_auc_mean": 0.1877,
+        "validation_pr_auc_sd": 0.0006,
+        "seeds": 3,
+        "n_features": 8
+      },
+      "current (D12 + D42)": {
+        "validation_pr_auc_mean": 0.22,
+        "validation_pr_auc_sd": 0.0011,
+        "seeds": 3,
+        "n_features": 26
+      },
+      "+ route": {
+        "validation_pr_auc_mean": 0.1921,
+        "validation_pr_auc_sd": 0.0013,
+        "seeds": 3,
+        "n_features": 27
+      },
+      "+ holiday": {
+        "validation_pr_auc_mean": 0.2185,
+        "validation_pr_auc_sd": 0.0014,
+        "seeds": 3,
+        "n_features": 27
+      },
+      "+ 3 h trend": {
+        "validation_pr_auc_mean": 0.2205,
+        "validation_pr_auc_sd": 0.0013,
+        "seeds": 3,
+        "n_features": 29
+      },
+      "+ route + holiday + 3 h trend": {
+        "validation_pr_auc_mean": 0.1931,
+        "validation_pr_auc_sd": 0.0006,
+        "seeds": 3,
+        "n_features": 31
+      }
+    },
+    "xgboost": {
+      "schedule only (no weather)": {
+        "validation_pr_auc_mean": 0.1892,
+        "validation_pr_auc_sd": 0.0003,
+        "seeds": 3,
+        "n_features": 8
+      },
+      "current (D12 + D42)": {
+        "validation_pr_auc_mean": 0.2219,
+        "validation_pr_auc_sd": 0.0006,
+        "seeds": 3,
+        "n_features": 26
+      },
+      "+ route": {
+        "validation_pr_auc_mean": 0.1866,
+        "validation_pr_auc_sd": 0.0012,
+        "seeds": 3,
+        "n_features": 27
+      },
+      "+ holiday": {
+        "validation_pr_auc_mean": 0.2206,
+        "validation_pr_auc_sd": 0.0004,
+        "seeds": 3,
+        "n_features": 27
+      },
+      "+ 3 h trend": {
+        "validation_pr_auc_mean": 0.2216,
+        "validation_pr_auc_sd": 0.0012,
+        "seeds": 3,
+        "n_features": 29
+      },
+      "+ route + holiday + 3 h trend": {
+        "validation_pr_auc_mean": 0.1848,
+        "validation_pr_auc_sd": 0.0003,
+        "seeds": 3,
+        "n_features": 31
+      }
+    },
+    "random_forest": {
+      "schedule only (no weather)": {
+        "validation_pr_auc_mean": 0.1939,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 8
+      },
+      "current (D12 + D42)": {
+        "validation_pr_auc_mean": 0.2249,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 26
+      },
+      "+ route": {
+        "validation_pr_auc_mean": 0.2262,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 27
+      },
+      "+ holiday": {
+        "validation_pr_auc_mean": 0.2283,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 27
+      },
+      "+ 3 h trend": {
+        "validation_pr_auc_mean": 0.2255,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 29
+      },
+      "+ route + holiday + 3 h trend": {
+        "validation_pr_auc_mean": 0.228,
+        "validation_pr_auc_sd": 0.0,
+        "seeds": 1,
+        "n_features": 31
+      }
+    }
+  }
+}

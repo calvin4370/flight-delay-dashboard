@@ -23,6 +23,21 @@ On test, LightGBM and XGBoost score slightly higher than the selected Random For
 **By horizon (Random Forest PR-AUC):** 3 h 0.242 · 6 h 0.235 · 9 h 0.236 · 12 h 0.229 (baseline 0.157 at every horizon: it has no weather).
 **By airport × direction (PR-AUC, model vs baseline):** ATL departures 0.275 vs 0.166 · ATL arrivals 0.216 vs 0.141 · DFW departures 0.246 vs 0.168 · DFW arrivals 0.189 vs 0.146.
 
+### What weather adds, and feature tests (validation only)
+
+`pipeline/feature_study_delay.py`, judged on validation PR-AUC (Jan–Jun 2024), each algorithm with its tuned settings, trained on 2023:
+
+| Variant | LightGBM | XGBoost | Random Forest |
+|---|---|---|---|
+| Schedule only (no weather) | 0.188 | 0.189 | 0.194 |
+| **Current: schedule + weather (D12, D42)** | **0.220** | **0.222** | **0.225** |
+| + route (other airport) | 0.192 | 0.187 | 0.226 |
+| + days to US federal holiday | 0.219 | 0.221 | 0.228 (0.224 over 3 more seeds) |
+| + last-3 h weather trend | 0.221 | 0.222 | 0.226 |
+
+- **Weather adds +0.031 to +0.033 PR-AUC (+16–18%) over the schedule alone, for every algorithm.**
+- None of the extra features helps consistently: route hurts the boosted models (too many airport categories for one training year), and the small Random Forest differences are within seed noise. The feature set stays as built.
+
 ### Impact (measured on the test sample)
 
 - Compared with the schedule-only baseline, the model raises **32% fewer false alarms** (6,897 vs 10,124) while catching **6% more** severe flights (2,150 vs 2,028).

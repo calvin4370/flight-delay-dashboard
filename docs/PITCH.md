@@ -18,6 +18,7 @@ Times are targets. Numbers marked *AAR* come from `data/outputs/aar_metrics.json
 - Tested once on a full unseen year, Jul 2024 – Jul 2025, against the TMC's simplest reference: the usual delay rate for that hour and month.
 - Delay risk: **PR-AUC 0.235 vs 0.157**, precision 24% vs 17%, **32% fewer false alarms** while catching 6% more severe flights.
 - Useful even 12 hours out (PR-AUC 0.229 vs 0.157).
+- Weather is what makes the difference: removing it drops PR-AUC by 16–18% for every algorithm we tried.
 - AAR: *RMSE model vs baseline (AAR)*.
 
 ## 2:00–2:30 · Where it fails, and how the TMC knows (trust & traceability)
