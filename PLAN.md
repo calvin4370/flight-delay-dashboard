@@ -139,12 +139,12 @@ Goal: each person works in their own files and branch, so changes land one after
 ## Workstreams
 
 ### 0. Setup and coordination
-- Branches: `main` holds the plan and finished work; `AAR` holds the AAR regressor (WS3) until results are in. Plan updates go to `main` so everyone sees them.
+- Branches: **everyone works on `main`** (no feature branches; no time). Pull before every commit. Branch `AAR` was merged (`16a46cd`) and deleted.
 - [x] Next.js app scaffolded; uv Python project; EDA notebook complete
 - [ ] Settle Open decisions above
 - [ ] Teammate set up: repo, `npm install`, `uv sync`
-- [x] Add approved packages (D23) (Claude, branch `AAR`, `448d61e`) — lightgbm, optuna, statsmodels, scikit-learn, xgboost; shap still to add
-- [x] Ignore large generated data: `data/raw/bts/`, `data/processed/`, `data/models/` in `.gitignore` (Claude, branch `AAR`)
+- [x] Add approved packages (D23) (Claude, `448d61e`) — lightgbm, optuna, statsmodels, scikit-learn, xgboost; shap still to add
+- [x] Ignore large generated data: `data/raw/bts/`, `data/processed/`, `data/models/` in `.gitignore` (Claude)
 
 ### 1. Data pipeline — delay side: Calvin · any-airport fetch: YXY4NG (proposed, D41)
 - [ ] Load provided data (D30) and fetch external data by script (D7, D13)
@@ -164,14 +164,14 @@ Goal: each person works in their own files and branch, so changes land one after
 - [ ] Prediction explanations (D27)
 
 ### 3. AAR regressor (D5, D16, D18) — YXY4NG (proposed, D41)
-Status: code written and pushed (`448d61e`, branch `AAR`); **not run end to end yet**. BTS download in progress.
-- [~] BTS fetch (D7) (Claude, branch `AAR`) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
-- [~] AAR target and features (D8, D34) (Claude, branch `AAR`) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
-- [~] Baseline (D22) (Claude, branch `AAR`) — in `pipeline/train_aar.py`, training period only
-- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude, branch `AAR`) — `pipeline/train_aar.py`; all models learn from 2023 only
-- [~] Report RMSE vs baseline (Claude, branch `AAR`) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
+Status: code written and on `main`; **not run end to end yet**. BTS download in progress.
+- [~] BTS fetch (D7) (Claude) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
+- [~] AAR target and features (D8, D34) (Claude) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
+- [~] Baseline (D22) (Claude) — in `pipeline/train_aar.py`, training period only
+- [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude) — `pipeline/train_aar.py`; all models learn from 2023 only
+- [~] Report RMSE vs baseline (Claude) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
 - [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
-- [ ] Merge branch `AAR` into `main` once results are in (a team member) — note: merged in `16a46cd` before the first run
+- [x] Merge branch `AAR` into `main` (`16a46cd`, before the first run); branch deleted
 - [ ] Review notes from Calvin's Claude (YXY4NG to decide):
   - `train_aar.py` line 249 picks the best model by **test** RMSE; D20 tunes on validation, so selecting on validation keeps the test score unseen
   - SARIMAX has no weather input and is one model per airport (D34 lists weather features; D16 says each model covers both airports)
