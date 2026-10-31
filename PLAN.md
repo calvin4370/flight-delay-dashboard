@@ -98,6 +98,9 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D35 | JSON field definitions for each output file (D24); Claude drafts per D37 |
 | D36 | The specific recommendation rules and their thresholds (D26); Claude drafts per D37 |
 | D39 | Which public airport database (D13), and any package needed for the weather/airport fetch |
+| D41 | Workload split between Calvin and YXY4NG (see "Workload split", *Proposed*) |
+| D42 | Per-horizon reading of the window features in D12/D34: for a forecast h hours ahead, use the latest observation at h hours plus the 10 hours ending there (as `build_aar.py` does)? |
+| D43 | Arrivals in the repeated autumn daylight-saving hour are dropped (added to Assumptions by YXY4NG's Claude; needs a human decision) |
 
 ## Assumptions to state in the demo
 
@@ -110,6 +113,29 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 
 ---
 
+## Workload split (*Proposed*: Calvin and YXY4NG to confirm → D41)
+
+Goal: each person works in their own files and branch, so changes land one after another without merge clashes.
+
+| | **Calvin** | **YXY4NG** |
+|---|---|---|
+| Owns | WS2 delay classifier; delay side of WS1; WS7 evaluation write-up; WS8 pitch and submission | WS3 AAR regressor; any-airport fetch in WS1 (D13, D39); WS4 contract; WS5 app; WS6 Claude briefing |
+| Files | `pipeline/build_delay.py`, `pipeline/train_delay.py`, `data/outputs/delay_*`, `notebooks/`, `pyproject.toml` + `uv.lock` (adds `shap`) | `pipeline/*_aar.py`, `pipeline/fetch_bts.py`, `pipeline/fetch_weather.py` (+ airport data), `data/outputs/aar_*`, `src/` (app) |
+| Branch | `delay` | `AAR`, then `app` |
+| Drafts (D37) | — | D35 JSON fields, D36 recommendation rules |
+
+**Order of work**
+1. In parallel: Calvin builds delay features and trains the delay classifier; YXY4NG runs the AAR pipeline, goes through the review notes in WS3, then drafts D35 and starts the app against `aar_*` outputs.
+2. Calvin writes `data/outputs/delay_*` in the D35 format; YXY4NG wires the delay outputs into the app.
+3. Both: evaluation (each writes their own model's results), then Calvin assembles the pitch and submits.
+
+**Rules to avoid clashes**
+- Only edit files you own. To change someone else's file, ask them.
+- Shared code: the delay pipeline may import `weather_features()` from `pipeline/build_aar.py` but doesn't edit it; YXY4NG announces any change to it.
+- Packages: only one person changes `pyproject.toml` / `uv.lock` at a time (Calvin adds `shap`); everyone runs `uv sync` after pulling.
+- `PLAN.md`: pull first, edit only your own task lines, commit plan changes on their own, and push straight away.
+- Merges into `main` are done by the branch owner after their pipeline runs end to end.
+
 ## Workstreams
 
 ### 0. Setup and coordination
@@ -120,7 +146,7 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [x] Add approved packages (D23) (Claude, branch `AAR`, `448d61e`) — lightgbm, optuna, statsmodels, scikit-learn, xgboost; shap still to add
 - [x] Ignore large generated data: `data/raw/bts/`, `data/processed/`, `data/models/` in `.gitignore` (Claude, branch `AAR`)
 
-### 1. Data pipeline
+### 1. Data pipeline — delay side: Calvin · any-airport fetch: YXY4NG (proposed, D41)
 - [ ] Load provided data (D30) and fetch external data by script (D7, D13)
 - [ ] Build prediction targets (D3, D9)
 - [ ] Convert flight times to UTC (D40) and join weather under the 3-hour rule (D4, D10)
@@ -130,14 +156,14 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 - [ ] Cite all data sources
 - [~] Hourly weather fetch for any airport code (D13) (Claude) — `scripts/fetch_weather.py` (Meteostat bulk, not committed) reproduces the provided ATL/DFW file 100%; to move into `pipeline/` (D15); airport database still waits on D39
 
-### 2. Delay classifier (D16, D17)
+### 2. Delay classifier (D16, D17) — Calvin (proposed, D41)
 - [ ] Baseline (D22)
 - [ ] Train RF, XGBoost, LightGBM with Optuna on PR-AUC (D20) using the split (D11)
 - [ ] Threshold by max F1 on validation (D21)
 - [ ] Report precision, recall, accuracy, confusion matrix vs baseline
 - [ ] Prediction explanations (D27)
 
-### 3. AAR regressor (D5, D16, D18)
+### 3. AAR regressor (D5, D16, D18) — YXY4NG (proposed, D41)
 Status: code written and pushed (`448d61e`, branch `AAR`); **not run end to end yet**. BTS download in progress.
 - [~] BTS fetch (D7) (Claude, branch `AAR`) — `pipeline/fetch_bts.py`; downloading (21/31 months at 14:50)
 - [~] AAR target and features (D8, D34) (Claude, branch `AAR`) — `pipeline/build_aar.py`: wheels-on per UTC hour; horizons 3/6/9/12 h; weather at issue time + 10 h window summaries incl. crosswind/tailwind; leakage assert; IATA/ICAO input
@@ -145,29 +171,33 @@ Status: code written and pushed (`448d61e`, branch `AAR`); **not run end to end 
 - [~] Train RF, XGBoost, LightGBM, SARIMAX with Optuna on RMSE (D20) using the split (D11) (Claude, branch `AAR`) — `pipeline/train_aar.py`; all models learn from 2023 only
 - [~] Report RMSE vs baseline (Claude, branch `AAR`) — will write `data/outputs/aar_metrics.json` (overall, per airport, per horizon); JSON format provisional until D35
 - [ ] AAR failure case and limits (D28) — `data/outputs/aar_largest_errors.csv` lists candidates after the run
-- [ ] Merge branch `AAR` into `main` once results are in (a team member)
+- [ ] Merge branch `AAR` into `main` once results are in (a team member) — note: merged in `16a46cd` before the first run
+- [ ] Review notes from Calvin's Claude (YXY4NG to decide):
+  - `train_aar.py` line 249 picks the best model by **test** RMSE; D20 tunes on validation, so selecting on validation keeps the test score unseen
+  - SARIMAX has no weather input and is one model per airport (D34 lists weather features; D16 says each model covers both airports)
+  - D23 row: "approved by a team member in chat" — which team member?
 
-### 4. Pipeline → app contract
+### 4. Pipeline → app contract — YXY4NG (proposed, D41)
 - [ ] Define contract (D24, D35)
 - [ ] Export predictions
 
-### 5. App (Next.js)
+### 5. App (Next.js) — YXY4NG (proposed, D41)
 - [ ] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance
 - [ ] Recommendations (D26, D36)
 - [ ] Explanations / traceability in the UI (D27)
 - [ ] Uncertainty visible; the user makes the final call
 
-### 6. Claude in the app
+### 6. Claude in the app — YXY4NG (proposed, D41)
 - [ ] TMC briefing (D14)
 
-### 7. Evaluation
+### 7. Evaluation — each owner writes their model's results; Calvin assembles (proposed, D41)
 - [ ] Results: baselines vs models (delays and AAR)
 - [ ] Failure case with a reason, and how the user knows (D28)
 - [ ] Run on dates/flights beyond the demo
 - [ ] Impact: before/after vs baseline, measured vs estimated kept separate
 - [ ] Realistic adoption constraints
 
-### 8. Pitch and submission
+### 8. Pitch and submission — Calvin (proposed, D41)
 - [ ] TMC's current process and the cost of reacting late (problem realism)
 - [ ] State assumptions; cite data sources
 - [ ] First valid submission (D32)
