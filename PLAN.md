@@ -91,18 +91,19 @@ Every requirement from the updated brief (Challenge #5), the Summary of Updates 
 | D40 | Flight local times are converted to UTC (per airport time zone) before matching to the hourly weather | Calvin |
 | D41 | Workload split as in "Workload split" below | Calvin, YXY4NG |
 | D42 | Weather features per horizon (brief: at horizon h, only weather observed ≥ h hours before): the reading at h hours before + summaries of the 10 hours ending there; applies to D12 and D34 | Calvin |
+| D32 | First valid submission by 15:30 (public repo with both models' outputs and a working app view); final by 16:05 | Claude (delegated by Calvin) |
+| D35 | Output contract: the D35 proposal below, approved. Export the **whole test period** (not only demo days) so the app works on any date; `top_factors[]` up to 3 per prediction to keep files small | Claude (delegated by Calvin) |
+| D39 | Airport data: option A (Meteostat station list + OurAirports), no new package | Claude (delegated by Calvin) |
+| D43 | Flights in the repeated autumn daylight-saving hour are dropped; stated as an assumption | Claude (delegated by Calvin) |
+| D44 | WS3 review notes: AAR best model is selected on validation RMSE (not test); SARIMAX stays without weather as a time-series comparison, stated in results; YXY4NG fills in who approved xgboost in D23 | Claude (delegated by Calvin) |
 
 ### Open
 
 | # | Question |
 |---|---|
-| D32 | What counts as the first valid submission, and checkpoint times |
-| D35 | JSON field definitions for each output file (D24); Claude drafts per D37 |
 | D36 | The specific recommendation rules and their thresholds (D26); Claude drafts per D37 |
-| D39 | Which public airport database (D13), and any package needed for the weather/airport fetch |
-| D43 | Flights in the repeated autumn daylight-saving hour (not covered by the brief; affects only the AAR pipeline, 0 delay-model flights): YXY4NG decides and states it as an assumption |
 
-### D35 proposal: output JSON contract (drafted by Claude per D37; *Open* until a team member approves)
+### D35 output JSON contract (approved, see D35 above)
 
 All files in `data/outputs/`, UTF-8 JSON, times as ISO strings (`time_utc` plus `time_local`). Every file starts with
 `"generated_utc"`, `"source"` (script name) and `"split"` (D11 dates). Missing values are `null`, never invented.
@@ -118,7 +119,7 @@ All files in `data/outputs/`, UTF-8 JSON, times as ISO strings (`time_utc` plus 
 Shared shapes:
 - `top_factors[]` (D27): up to 5 × {`feature`, `label` (plain words), `value`, `shap`, `observed_utc` (timestamp of the weather reading, null for schedule features)}.
 - `failure_cases[]` (D28): {`airport`, `time_utc`, `what_happened`, `predicted`, `actual`, `reason`, `how_user_knows`}.
-- **Demo window (needs a decision):** export the **whole test period** (large: ~76k AAR rows, likely tens of MB) or **only chosen demo days** (e.g. 3–5 test days incl. one severe-weather day and one failure day) for the risk board, with metrics always on the full test period.
+- **Demo window (decided in D35: whole test period):** export the **whole test period** (large: ~76k AAR rows, likely tens of MB) or **only chosen demo days** (e.g. 3–5 test days incl. one severe-weather day and one failure day) for the risk board, with metrics always on the full test period.
 
 ### D39 options: airport data for any airport code (D13)
 
@@ -133,6 +134,7 @@ Runway heading for a new airport: the brief only fixes ATL/DFW; for others, use 
 ## Assumptions to state in the demo
 
 - [ ] Runway headings ATL 80°, DFW 180° (brief)
+- [ ] Flights in the repeated autumn daylight-saving hour are dropped (D43)
 - [ ] AAR proxy = realised arrival throughput from BTS, not the FAA's declared rate (D8)
 - [ ] Weather observations only, no forecasts (D13)
 - [ ] AAR proxy counts only flights that landed: cancelled and diverted flights are not arrivals (D8)
