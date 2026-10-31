@@ -48,8 +48,7 @@ export async function POST(request: Request) {
     return Response.json({ facts, briefing: null, error: `Claude API error ${res.status}: ${(await res.text()).slice(0, 300)}` });
   }
   const body = (await res.json()) as { content: { type: string; text?: string }[]; stop_reason?: string };
-  const briefing = body.content.filter((c) => c.type === "text").map((c) => c.text).join("
-").trim();
+  const briefing = body.content.filter((c) => c.type === "text").map((c) => c.text).join("\n").trim();
   if (!briefing) {
     return Response.json({ facts, briefing: null, stop_reason: body.stop_reason, error: `Claude returned no text (stop reason: ${body.stop_reason ?? "unknown"}). Try again; the facts below are unchanged.` });
   }
