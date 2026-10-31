@@ -214,7 +214,7 @@ Status: done end to end (15:06). Test RMSE (arrivals/h): baseline 11.29 · RF 8.
 
 ### 5. App (Next.js) — YXY4NG (D41)
 - [x] Views (D25): risk scores, AAR forecast, historical trends (rates), model performance (YXY4NG + Claude, `61566aa`); delay sections fill in when `delay_flights/metrics/trends.json` are exported
-- [~] Recommendations (D26, D36) (YXY4NG + Claude) — rules R1–R4 built and shown as pending; waiting for D36 approval
+- [x] Recommendations (D26, D36) (YXY4NG + Claude) — rules R1–R4 approved and live in the app
 - [x] Explanations / traceability in the UI (D27) (YXY4NG + Claude) — top-3 SHAP factors with observation timestamps per hour/flight
 - [x] Uncertainty visible; the user makes the final call (YXY4NG + Claude) — 80% range per hour; recommendations labelled advisory
 
